@@ -2,11 +2,11 @@
 
 
 #if _EXECUTION_ENVIRONMENT == 0
-#include "lib/common/Compass/Compass.hpp"
-#include "lib/common/Driver/Driver.hpp"
-#include "lib/common/Lasers/Lasers.hpp"
-#include "lib/common/Serial/Serial.hpp"
-#include "lib/common/Temp/Temp.hpp"
+#include "../lib/Compass/Compass.hpp"
+#include "../lib/Driver/Driver.hpp"
+#include "../lib/Lasers/Lasers.hpp"
+#include "../lib/Serial/SerialPort.hpp"
+#include "../lib/Temp/Temp.hpp"
 #else
 #include <Compass.hpp>
 #include <Driver.hpp>

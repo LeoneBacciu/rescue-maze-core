@@ -4,8 +4,8 @@
 // VL53L0X datasheet.
 
 #include "VL53L0X.h"
-#include <Wire.h>
 
+#if _EXECUTION_ENVIRONMENT != 0
 // Defines /////////////////////////////////////////////////////////////////////
 
 // The Arduino two-wire interface uses a 7-bit number for the address,
@@ -1036,3 +1036,4 @@ bool VL53L0X::performSingleRefCalibration(uint8_t vhv_init_byte)
 
   return true;
 }
+#endif

@@ -1,6 +1,11 @@
 // ReSharper disable CppUE4CodingStandardNamingViolationWarning
 #pragma once
+
+#if _EXECUTION_ENVIRONMENT == 0
+#include <tuple>
+#else
 #include "../../../../../.platformio/packages/toolchain-gccarmnoneeabi/arm-none-eabi/include/c++/9.2.1/tuple"
+#endif
 
 typedef const std::tuple<char, char, char, char> Directions;
 typedef const std::tuple<char, char, char, char> Walls;

@@ -1,8 +1,8 @@
 #pragma once
 #if _EXECUTION_ENVIRONMENT == 0
-#include "MainMaze/robot/data/Directions.hxx"
-#include "MainMaze/robot/utils/Singleton.hxx"
-#include "MainMaze/robot/lib/common/Driver/Driver.hpp"
+#include "MainMaze/robot/lib/Serial/Communication/Directions.hxx"
+#include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
+#include "MainMaze/robot/lib/Driver/Driver.hpp"
 #else
 #include <Driver.hpp>
 #include <utils/Singleton.hxx>

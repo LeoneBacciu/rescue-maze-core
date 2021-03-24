@@ -2,16 +2,15 @@
 
 
 #if _EXECUTION_ENVIRONMENT == 0
-#include "MainMaze/robot/lib/common/Bus/BusConnection.hpp"
-#include "MainMaze/robot/utils/Singleton.hxx"
-#include "MainMaze/robot/utils/Constants.hxx"
+#include "MainMaze/robot/lib/Bus/BusConnection.hpp"
+#include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
+#include "MainMaze/robot/lib/extra/utils/Constants.hxx"
 #include "DrawDebugHelpers.h"
 #else
 #include <utils/Singleton.hxx>
 #include <utils/Constants.hxx>
 #include <BusConnection.hpp>
 #include <VL53L0X/VL53L0X.h>
-
 #endif
 
 class Lasers : public Singleton<Lasers>, BusConnection
@@ -35,7 +34,7 @@ public:
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
-	float Read(FVector direction, float delta_y = 0, bool draw=false) const;
+	uint16_t Read(FVector direction, float delta_y = 0, bool draw=false) const;
 	float MakeError(float value) const;
 #else
     bool continuous = false;

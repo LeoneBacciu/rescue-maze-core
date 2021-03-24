@@ -1,13 +1,14 @@
 ﻿#pragma once
 
 #if _EXECUTION_ENVIRONMENT == 0
-#define delayMicroseconds(t) FPlatformProcess::Sleep(d / 1000.0);
-#include "MainMaze/robot/lib/common/Gyro/Gyro.hpp"
-#include "MainMaze/robot/lib/common/Lasers/Lasers.hpp"
-#include "MainMaze/robot/lib/common/Bus/BusConnection.hpp"
-#include "MainMaze/robot/utils/Singleton.hxx"
-#include "MainMaze/robot/data/Directions.hxx"
-#include "MainMaze/robot/utils/Math.hxx"
+#define delayMicroseconds(t) FPlatformProcess::Sleep(t / 1000.0);
+#define UEDebug
+#include "MainMaze/robot/lib/Gyro/Gyro.hpp"
+#include "MainMaze/robot/lib/Lasers/Lasers.hpp"
+#include "MainMaze/robot/lib/Bus/BusConnection.hpp"
+#include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
+#include "MainMaze/robot/lib/Serial/Communication/Directions.hxx"
+#include "MainMaze/robot/lib/extra/utils/Math.hxx"
 #else
 #define PWM_R PB3
 #define INV_R1 PB12
@@ -24,12 +25,10 @@
 
 class Driver : public Singleton<Driver>, BusConnection
 {
-	const uint8_t max_lateral_compensation_speed_ = 6;
-	const uint8_t lateral_compensation_threshold_ = 10;
+	const uint8_t max_lateral_compensation_speed_ = 15;
+	const uint8_t lateral_compensation_threshold_ = 20;
 	const uint8_t lateral_compensation_multiplier_ = 20;
-	const uint8_t frontal_compensation_multiplier_ = 5;
-	const uint8_t stuck_compensation_multiplier_ = 40;
-	const uint8_t degree_override_threshold_ = 5;
+	const uint8_t frontal_compensation_multiplier_ = 2;
 
 	enum Speeds : uint8_t { kSlow=30, kMedium=50, kFast=100 };
 
@@ -40,5 +39,5 @@ public:
     static bool LeftTurnCondition(float start, float current, float goal);
 
 private:
-    static void SetSpeed(int l, int r);
+    void SetSpeed(int l, int r);
 };

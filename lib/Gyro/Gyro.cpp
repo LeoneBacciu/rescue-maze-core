@@ -1,7 +1,7 @@
 ﻿#include "Gyro.hpp"
 
 #if _EXECUTION_ENVIRONMENT == 0
-void Gyro::Start(unsigned long refresh)
+void Gyro::Begin(unsigned long refresh)
 {
     const auto now = high_resolution_clock::now();
     last_reset_time_ = duration_cast<milliseconds>(now.time_since_epoch()).count();
@@ -28,13 +28,17 @@ void Gyro::Calibrate()
     last_reset_time_ = duration_cast<milliseconds>(now.time_since_epoch()).count();
 }
 
+void Gyro::Update()
+{
+}
+
 float Gyro::CalculateError()
 {
     if (error_)
     {
         const auto now = high_resolution_clock::now();
         const auto millis = duration_cast<milliseconds>(now.time_since_epoch()).count();
-        const auto current_error = drift_ * (millis - last_reset_time_) / 1000 - FMath::RandRange(0, 1);
+        const auto current_error = drift_ * (millis - last_reset_time_) / 60000 - FMath::RandRange(0, 1);
         return current_error;
     }
     return 0.0;

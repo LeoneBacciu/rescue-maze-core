@@ -1,7 +1,7 @@
 ﻿// ReSharper disable CppUE4CodingStandardNamingViolationWarning
 #include "InputMessage.hpp"
 #if _EXECUTION_ENVIRONMENT == 0
-#include "MainMaze/robot/utils/Constants.hxx"
+#include "MainMaze/robot/lib/extra/utils/Constants.hxx"
 #else
 #include <utils/Constants.hxx>
 #endif

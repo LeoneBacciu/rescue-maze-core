@@ -1,6 +1,6 @@
-#ifndef VL53L0X_h
-#define VL53L0X_h
+#pragma once
 
+#if _EXECUTION_ENVIRONMENT != 0
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -174,8 +174,4 @@ class VL53L0X
     static uint32_t timeoutMclksToMicroseconds(uint16_t timeout_period_mclks, uint8_t vcsel_period_pclks);
     static uint32_t timeoutMicrosecondsToMclks(uint32_t timeout_period_us, uint8_t vcsel_period_pclks);
 };
-
 #endif
-
-
-

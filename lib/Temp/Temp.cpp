@@ -4,48 +4,47 @@
 #if _EXECUTION_ENVIRONMENT == 0
 void Temp::Calibrate()
 {
-    const GeometricPair<float> values = Read();
-    threshold = (values.left + values.right) / 2;
+	const GeometricPair<uint16_t> values = Read();
+	threshold = (values.left + values.right) / 2;
 }
 
-GeometricPair<float> Temp::Read() const
+GeometricPair<uint16_t> Temp::Read()
 {
-    const auto out = GeometricPair<float>(
-        ReadSide(GetBus()->GetActor()->GetActorRightVector() * -1),
-        ReadSide(GetBus()->GetActor()->GetActorRightVector())
-    );
-    return out;
+	return {
+		ReadSide(GetBus()->GetActor()->GetActorRightVector() * -1),
+		ReadSide(GetBus()->GetActor()->GetActorRightVector())
+	};
 }
 
-GeometricPair<bool> Temp::IsHot() const
+GeometricPair<bool> Temp::IsHot()
 {
-    const auto measures = Read();
-    return GeometricPair<bool>(
-        measures.left > threshold,
-        measures.right > threshold
-    );
+	const auto measures = Read();
+	return {
+		measures.left > threshold,
+		measures.right > threshold
+	};
 }
 
-float Temp::ReadSide(FVector direction) const
+uint16_t Temp::ReadSide(FVector direction) const
 {
-    FHitResult out_hit;
+	FHitResult out_hit;
 
-    FVector start = GetBus()->GetActor()->GetActorLocation();
+	FVector start = GetBus()->GetActor()->GetActorLocation();
 
-    FVector end = start + direction * 1000.0f;
+	FVector end = start + direction * 1000.0f;
 
-    FCollisionQueryParams collision_params;
+	FCollisionQueryParams collision_params;
 
-    bool is_hit = GetBus()->GetActor()->GetWorld()->LineTraceSingleByChannel(out_hit, start, end, ECC_Visibility,
-                                                                             collision_params);
-    float result = 0;
-    if (is_hit)
-    {
-        AWall* wall = Cast<AWall>(out_hit.GetActor());
-        if (wall) result = wall->temp;
-        // if (wall) result = (OutHit.Distance < 30) ? wall->temp : 25;
-    }
-    return result;
+	bool is_hit = GetBus()->GetActor()->GetWorld()->LineTraceSingleByChannel(out_hit, start, end, ECC_Visibility,
+	                                                                         collision_params);
+	float result = 0;
+	if (is_hit)
+	{
+		AWall* wall = Cast<AWall>(out_hit.GetActor());
+		if (wall) result = wall->temp;
+		// if (wall) result = (OutHit.Distance < 30) ? wall->temp : 25;
+	}
+	return result;
 }
 #else
 
@@ -79,5 +78,3 @@ uint16_t Temp::read16(uint8_t addr, uint8_t reg) {
 
 
 #endif
-
-

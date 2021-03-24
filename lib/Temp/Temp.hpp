@@ -3,9 +3,9 @@
 #if _EXECUTION_ENVIRONMENT == 0
 #include "DrawDebugHelpers.h"
 #include "MainMaze/Wall.h"
-#include "MainMaze/robot/lib/common/Bus/BusConnection.hpp"
-#include "MainMaze/robot/utils/GeometricPair.hxx"
-#include "MainMaze/robot/utils/Singleton.hxx"
+#include "MainMaze/robot/lib/Bus/BusConnection.hpp"
+#include "MainMaze/robot/lib/extra/utils/GeometricPair.hxx"
+#include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #else
 #define ADDR_L 0x5A
 #define ADDR_R 0x5B
@@ -24,9 +24,9 @@ public:
 	GeometricPair<uint16_t> Read();
 	GeometricPair<bool> IsHot();
 
-#if _EXECUTION_ENVIRONMENT == 0
 private:
-	float ReadSide(FVector direction) const;
+#if _EXECUTION_ENVIRONMENT == 0
+	uint16_t ReadSide(FVector direction) const;
 #else
     uint16_t readTemp(uint8_t addr);
     uint16_t read16(uint8_t addr, uint8_t reg);

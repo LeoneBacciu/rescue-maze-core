@@ -2,8 +2,8 @@
 
 
 #if _EXECUTION_ENVIRONMENT == 0
-#include "MainMaze/robot/lib/common/Bus/BusConnection.hpp"
-#include "MainMaze/robot/utils/Singleton.hxx"
+#include "MainMaze/robot/lib/Bus/BusConnection.hpp"
+#include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "Core/Public/Windows/AllowWindowsPlatformTypes.h"
 #include "Windows.h"
 #include <iostream>

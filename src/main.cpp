@@ -1,3 +1,4 @@
+#if _EXECUTION_ENVIRONMENT != 0
 #include <Wire.h>
 #include <Driver.hpp>
 #include <Gyro.hpp>
@@ -44,4 +45,4 @@ void loop() {
     gyro->Update();
     delay(25);
 }
-
+#endif

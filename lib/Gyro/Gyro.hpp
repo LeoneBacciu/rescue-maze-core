@@ -4,8 +4,8 @@
 
 
 #if _EXECUTION_ENVIRONMENT == 0
-#include "MainMaze/robot/lib/common/Bus/BusConnection.hpp"
-#include "MainMaze/robot/utils/Singleton.hxx"
+#include "MainMaze/robot/lib/Bus/BusConnection.hpp"
+#include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #else
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
@@ -28,7 +28,7 @@ public:
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
-	float drift_ = 0.2;
+	float drift_ = 3;
 	bool error_ = true;
 	float CalculateError();
 	long long last_reset_time_ = 0;

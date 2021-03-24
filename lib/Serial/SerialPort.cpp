@@ -2,15 +2,15 @@
 
 
 #if _EXECUTION_ENVIRONMENT == 0
-void Serial::Connect(const char* port_name, const int baud_rate)
+void SerialPort::Connect(const char* port_name, const int baud_rate)
 {
 	this->handler_ = CreateFileA(port_name,
-	                            GENERIC_READ | GENERIC_WRITE,
-	                            0,
-	                            nullptr,
-	                            OPEN_EXISTING,
-	                            FILE_ATTRIBUTE_NORMAL,
-	                            nullptr);
+	                             GENERIC_READ | GENERIC_WRITE,
+	                             0,
+	                             nullptr,
+	                             OPEN_EXISTING,
+	                             FILE_ATTRIBUTE_NORMAL,
+	                             nullptr);
 	if (this->handler_ == INVALID_HANDLE_VALUE)
 	{
 		std::cout << "Error opening serial port " << port_name << "\n";
@@ -33,7 +33,7 @@ void Serial::Connect(const char* port_name, const int baud_rate)
 	SetCommState(this->handler_, &dcb_serial_params);
 }
 
-int Serial::Read(char* buffer, const unsigned size) const
+int SerialPort::Read(char* buffer, const unsigned size) const
 {
 	DWORD bytes_read{};
 	const unsigned int bytes_to_read = size;
@@ -42,7 +42,7 @@ int Serial::Read(char* buffer, const unsigned size) const
 	return bytes_read;
 }
 
-bool Serial::Write(char buffer[], const unsigned size) const
+bool SerialPort::Write(char buffer[], const unsigned size) const
 {
 	DWORD bytes_written; // No of bytes written to the port
 
@@ -53,18 +53,16 @@ bool Serial::Write(char buffer[], const unsigned size) const
 	                 nullptr);
 }
 
-void Serial::Close() const
+void SerialPort::Close() const
 {
 	CloseHandle(this->handler_); //Closing the Serial Port
 }
 
-Serial::~Serial()
+SerialPort::~SerialPort()
 {
 	CloseHandle(this->handler_); //Closing the Serial Port
 }
 #else
-
-#endif
 
 void SerialPort::Connect(const char *port_name, int baud_rate) {
     Serial.begin(baud_rate);
@@ -87,4 +85,4 @@ SerialPort::~SerialPort() {
     Close();
 }
 
-
+#endif
