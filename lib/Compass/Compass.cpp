@@ -1,6 +1,6 @@
 #include "Compass.hpp"
 
-void Compass::GoTo(const direction objective)
+void Compass::GoTo(const Direction objective)
 {
 	Driver* driver = Driver::Instance();
 	const int difference = direction_ - objective;

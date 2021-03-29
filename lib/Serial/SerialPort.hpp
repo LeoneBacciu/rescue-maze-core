@@ -18,13 +18,15 @@ class SerialPort : public Singleton<SerialPort>, BusConnection
 {
 public:
 	void Connect(const char* port_name, int baud_rate);
-	int Read(char* buffer, unsigned size) const;
-	bool Write(char buffer[], unsigned size) const;
+	void Handshake() const;
+	void Read(uint8_t* buffer) const;
+	bool Write(uint8_t buffer[], unsigned size) const;
 	void Close() const;
 	~SerialPort();
 
-#if _EXECUTION_ENVIRONMENT == 0
 private:
+	uint8_t ReadOneByte() const;
+#if _EXECUTION_ENVIRONMENT == 0
 	HANDLE handler_ = nullptr;
 	bool connected_{};
 	COMSTAT status_{};

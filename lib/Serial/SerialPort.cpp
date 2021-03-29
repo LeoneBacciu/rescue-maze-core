@@ -13,7 +13,7 @@ void SerialPort::Connect(const char* port_name, const int baud_rate)
 	                             nullptr);
 	if (this->handler_ == INVALID_HANDLE_VALUE)
 	{
-		std::cout << "Error opening serial port " << port_name << "\n";
+		UE_LOG(LogTemp, Warning, TEXT("Error opening serial port "));
 		return;
 	}
 
@@ -33,16 +33,35 @@ void SerialPort::Connect(const char* port_name, const int baud_rate)
 	SetCommState(this->handler_, &dcb_serial_params);
 }
 
-int SerialPort::Read(char* buffer, const unsigned size) const
+void SerialPort::Handshake() const
 {
-	DWORD bytes_read{};
-	const unsigned int bytes_to_read = size;
-	memset(buffer, 0, size);
-	ReadFile(this->handler_, buffer, bytes_to_read, &bytes_read, nullptr);
-	return bytes_read;
+	uint8_t buffer[3];
+	this->Read(buffer);
+	this->Write(buffer, 3);
 }
 
-bool SerialPort::Write(char buffer[], const unsigned size) const
+void SerialPort::Read(uint8_t* buffer) const
+{
+	uint8_t last_char, index = 0;
+	do
+	{
+		last_char = ReadOneByte();
+		buffer[index++] = last_char;
+	}
+	while (last_char != 0xff);
+}
+
+uint8_t SerialPort::ReadOneByte() const
+{
+	DWORD bytes_read{};
+	uint8_t buffer[1];
+	const unsigned int bytes_to_read = 1;
+	memset(buffer, 0, 1);
+	ReadFile(this->handler_, buffer, bytes_to_read, &bytes_read, nullptr);
+	return buffer[0];
+}
+
+bool SerialPort::Write(uint8_t buffer[], const unsigned size) const
 {
 	DWORD bytes_written; // No of bytes written to the port
 
@@ -62,6 +81,7 @@ SerialPort::~SerialPort()
 {
 	CloseHandle(this->handler_); //Closing the Serial Port
 }
+
 #else
 
 void SerialPort::Connect(const char *port_name, int baud_rate) {

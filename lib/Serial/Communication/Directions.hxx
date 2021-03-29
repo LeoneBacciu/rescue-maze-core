@@ -7,26 +7,7 @@
 #include "../../../../../.platformio/packages/toolchain-gccarmnoneeabi/arm-none-eabi/include/c++/9.2.1/tuple"
 #endif
 
-typedef const std::tuple<char, char, char, char> Directions;
-typedef const std::tuple<char, char, char, char> Walls;
-
-namespace VDirection
-{
-	Directions const RIGHT = std::make_tuple(0x01, 0, 0, 0);
-	Directions const TOP = std::make_tuple(0, 0x01, 0, 0);
-	Directions const LEFT = std::make_tuple(0, 0, 0x01, 0);
-	Directions const BOTTOM = std::make_tuple(0, 0, 0, 0x01);
-};
-
-inline void copyTuple4(char* arr, Directions direction, int offset = 0)
-{
-	arr[offset + 0] = std::get<0>(direction);
-	arr[offset + 1] = std::get<1>(direction);
-	arr[offset + 2] = std::get<2>(direction);
-	arr[offset + 3] = std::get<3>(direction);
-}
-
-enum direction : int
+enum Direction : uint8_t
 {
 	kRight = 0,
 	kTop = 1,
@@ -34,7 +15,7 @@ enum direction : int
 	kBottom = 3
 };
 
-inline direction DirectionFromInt(const int p)
+inline Direction DirectionFromInt(const uint8_t p)
 {
 	switch (p)
 	{
@@ -47,4 +28,22 @@ inline direction DirectionFromInt(const int p)
 	default:
 		return kBottom;
 	}
+}
+
+inline Direction DirectionFromBytes(uint8_t* bytes)
+{
+	if (bytes[0] == 1) return kRight;
+	if (bytes[1] == 1) return kTop;
+	if (bytes[2] == 1) return kLeft;
+	return kBottom;
+}
+
+inline char* DirectionToBytes(const Direction direction)
+{
+	char out[4];
+	for (int i = 0; i < 4; ++i)
+	{
+		out[i] = direction == i ? 1 : 0;
+	}
+	return out;
 }

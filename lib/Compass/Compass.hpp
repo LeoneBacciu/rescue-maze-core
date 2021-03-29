@@ -11,8 +11,8 @@
 #endif
 
 class Compass : public Singleton<Compass> {
-    direction direction_ = kTop;
+    Direction direction_ = kTop;
 
 public:
-    void GoTo(direction objective);
+    void GoTo(Direction objective);
 };
