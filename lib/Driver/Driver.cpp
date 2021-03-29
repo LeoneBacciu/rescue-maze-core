@@ -115,14 +115,14 @@ void Driver::Go()
 		{
 			if (near && cells <= 1)
 			{
-				delta_yaw += Lasers::FrontDifference(l, r) * frontal_compensation_multiplier_;
+				delta_yaw += Lasers::FrontDifference(l, r) * frontal_compensation_multiplier;
 				delta_yaw /= distance_component;
 			}
 		}
-		if (lateral < lateral_compensation_threshold_ && lateral > -lateral_compensation_threshold_)
+		if (lateral < lateral_compensation_threshold && lateral > -lateral_compensation_threshold)
 		{
-			delta_yaw += math::Clamp(lateral * lateral_compensation_multiplier_, -max_lateral_compensation_speed_,
-			                         static_cast<int>(max_lateral_compensation_speed_)) / (is_valid_wall ? 1 : 2);
+			delta_yaw += math::Clamp(lateral * lateral_compensation_multiplier, -max_lateral_compensation_speed,
+			                         static_cast<int>(max_lateral_compensation_speed)) / (is_valid_wall ? 1 : 2);
 		}
 
 #ifdef UEDebug

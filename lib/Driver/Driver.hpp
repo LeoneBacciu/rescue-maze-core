@@ -23,21 +23,21 @@
 #include <utils/Math.hxx>
 #endif
 
-class Driver : public Singleton<Driver>, BusConnection
+class Driver : BusConnection
 {
-	const uint8_t max_lateral_compensation_speed_ = 15;
-	const uint8_t lateral_compensation_threshold_ = 20;
-	const uint8_t lateral_compensation_multiplier_ = 20;
-	const uint8_t frontal_compensation_multiplier_ = 2;
+	static const uint8_t max_lateral_compensation_speed = 15;
+	static const uint8_t lateral_compensation_threshold = 20;
+	static const uint8_t lateral_compensation_multiplier = 20;
+	static const uint8_t frontal_compensation_multiplier = 2;
 
 	enum Speeds : uint8_t { kSlow=30, kMedium=50, kFast=100 };
 
 public:
-	void Rotate(bool right);
-	void Go();
-    static bool RightTurnCondition(float start, float current, float goal);
-    static bool LeftTurnCondition(float start, float current, float goal);
+	static void Rotate(bool right);
+	static void Go();
+	static bool RightTurnCondition(float start, float current, float goal);
+	static bool LeftTurnCondition(float start, float current, float goal);
 
 private:
-    void SetSpeed(int l, int r);
+	static void SetSpeed(int l, int r);
 };

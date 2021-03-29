@@ -2,12 +2,11 @@
 
 void Compass::GoTo(const Direction objective)
 {
-	Driver* driver = Driver::Instance();
 	const int difference = direction_ - objective;
 	if (abs(difference) == 2)
 	{
-		driver->Rotate(false);
-		driver->Rotate(false);
+		Driver::Rotate(false);
+		Driver::Rotate(false);
 	}
 	else if (difference != 0)
 	{
@@ -15,8 +14,8 @@ void Compass::GoTo(const Direction objective)
 		if (direction_ == kBottom && objective == kRight) side = false;
 		else if (direction_ == kRight && objective == kBottom) side = true;
 		else if (difference < 0) side = false;
-		driver->Rotate(side);
+		Driver::Rotate(side);
 	}
 	direction_ = objective;
-	driver->Go();
+	Driver::Go();
 }
