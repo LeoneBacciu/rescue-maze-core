@@ -3,10 +3,7 @@
 
 #if _EXECUTION_ENVIRONMENT == 0
 #include "../lib/Compass/Compass.hpp"
-#include "../lib/Driver/Driver.hpp"
-#include "../lib/Lasers/Lasers.hpp"
 #include "../lib/Serial/SerialPort.hpp"
-#include "../lib/Temp/Temp.hpp"
 #else
 #include <Compass.hpp>
 #include <Driver.hpp>
@@ -17,10 +14,18 @@
 
 void Robot::Setup()
 {
-	Lasers* lasers = Lasers::Instance();
-	Temp* temps = Temp::Instance();
 	SerialPort* serial = SerialPort::Instance();
 	Compass* compass = Compass::Instance();
+
+	serial->Connect("COM4", 9600);
+
+	serial->Handshake();
+
+	InputEnvelope* envelope = serial->ReadEnvelope();
+
+	compass->GoTo(envelope->direction);
+	
+	serial->Close();
 }
 
 void Robot::Main()

@@ -12,13 +12,22 @@
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
 #endif
+#include "Communication/Envelope.hpp"
 
 
 class SerialPort : public Singleton<SerialPort>, BusConnection
 {
+	static const uint8_t in_env_length = 8;
+	static const uint8_t out_env_length = 8;
+
 public:
+
 	void Connect(const char* port_name, int baud_rate);
 	void Handshake() const;
+
+	InputEnvelope* ReadEnvelope() const;
+	void WriteEnvelope(OutputEnvelope* envelope) const;
+
 	void Read(uint8_t* buffer) const;
 	bool Write(uint8_t buffer[], unsigned size) const;
 	void Close() const;

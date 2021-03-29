@@ -7,6 +7,21 @@ void SerialPort::Handshake() const {
     this->Write(buffer, 3);
 }
 
+
+InputEnvelope* SerialPort::ReadEnvelope() const
+{
+    uint8_t buffer[in_env_length];
+    this->Read(buffer);
+    return InputEnvelope::FromBytes(buffer);
+}
+
+void SerialPort::WriteEnvelope(OutputEnvelope* envelope) const
+{
+    uint8_t buffer[out_env_length];
+    envelope->ToBytes(buffer);
+    this->Write(buffer, out_env_length);
+}
+
 void SerialPort::Read(uint8_t *buffer) const {
     uint8_t last_char, index = 0;
     do {
