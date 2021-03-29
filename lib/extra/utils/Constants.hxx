@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#if _EXECUTION_ENVIRONMENT != 0
+#include <cstdint>
+#endif
 
 namespace dimensions
 {
