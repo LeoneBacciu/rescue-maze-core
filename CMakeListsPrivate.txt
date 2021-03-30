@@ -13,8 +13,8 @@ set(CLION_SVD_FILE_PATH "$ENV{HOME}/.platformio/platforms/ststm32/misc/svd/STM32
 
 SET(CMAKE_C_COMPILER "$ENV{HOME}/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc")
 SET(CMAKE_CXX_COMPILER "$ENV{HOME}/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++")
-SET(CMAKE_CXX_FLAGS "-std=gnu++14 -fno-threadsafe-statics -fno-rtti -fno-exceptions -fno-use-cxa-atexit -Os -Os -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections -Wall -nostdlib --param max-inline-insns-single=500")
-SET(CMAKE_C_FLAGS "-std=gnu11 -Os -Os -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections -Wall -nostdlib --param max-inline-insns-single=500")
+SET(CMAKE_CXX_FLAGS "-std=gnu++14 -fno-threadsafe-statics -fno-rtti -fno-exceptions -fno-use-cxa-atexit -fexceptions -Os -Os -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections -Wall -nostdlib --param max-inline-insns-single=500")
+SET(CMAKE_C_FLAGS "-std=gnu11 -fexceptions -Os -Os -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections -Wall -nostdlib --param max-inline-insns-single=500")
 
 SET(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)

@@ -3,20 +3,26 @@
 #if _EXECUTION_ENVIRONMENT == 0
 #include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
 #else
-#include <Compass.hpp>
-#include <Driver.hpp>
-#include <Lasers.hpp>
-#include <SerialPort.hpp>
-#include <Temp.hpp>
 #endif
 
 SerialPort* Robot::serial_;
 Compass* Robot::compass_;
+Lasers* Robot::lasers_;
+Gyro* Robot::gyro_;
+Temp* Robot::temp_;
 
 void Robot::Setup()
 {
 	serial_ = SerialPort::Instance();
 	compass_ = Compass::Instance();
+	lasers_ = Lasers::Instance();
+	gyro_ = Gyro::Instance();
+	temp_ = Temp::Instance();
+
+	lasers_->Begin();
+	gyro_->Begin(25);
+	gyro_->Calibrate();
+	temp_->Calibrate();
 
 	serial_->Connect("COM4", 9600);
 
@@ -36,13 +42,11 @@ bool Robot::Main()
 		return false;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Serial: %d"), input_envelope->drop);
-
 	compass_->GoTo(input_envelope->direction);
 
 	Walls* walls = compass_->GetWalls();
 
-	OutputEnvelope* output_envelope = new OutputEnvelope(walls, false, false);
+	auto* output_envelope = new OutputEnvelope(walls, false, false);
 
 	serial_->WriteEnvelope(output_envelope);
 

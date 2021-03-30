@@ -1,3 +1,4 @@
 .pio
+.idea
 cmake-build-debug
 cmake-build-bluepill_f103c8
