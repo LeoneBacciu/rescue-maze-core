@@ -21,11 +21,17 @@ void Robot::Setup()
 
 	serial->Handshake();
 
-	InputEnvelope* envelope = serial->ReadEnvelope();
+	InputEnvelope* input_envelope = serial->ReadEnvelope();
 	
-	UE_LOG(LogTemp, Warning, TEXT("Serial: %d"), envelope->drop);
+	UE_LOG(LogTemp, Warning, TEXT("Serial: %d"), input_envelope->drop);
 
-	compass->GoTo(envelope->direction);
+	compass->GoTo(input_envelope->direction);
+
+	Walls* walls = compass->GetWalls();
+
+	OutputEnvelope* output_envelope = new OutputEnvelope(walls, false, false);
+
+	serial->WriteEnvelope(output_envelope);
 	
 	serial->Close();
 }

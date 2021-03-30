@@ -20,11 +20,11 @@ public:
 class OutputEnvelope
 {
 public:
-	const Walls walls;
+	const Walls* walls;
 	const bool black;
 	const bool checkpoint;
 
-	OutputEnvelope(const Walls walls, const bool black, const bool checkpoint)
+	OutputEnvelope(const Walls* walls, const bool black, const bool checkpoint)
 		: walls(walls), black(black), checkpoint(checkpoint)
 	{
 	}

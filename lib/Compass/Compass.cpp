@@ -20,12 +20,13 @@ void Compass::GoTo(const Direction objective)
 	Driver::Go();
 }
 
-void Compass::GetWalls(uint8_t* walls) const
+Walls* Compass::GetWalls() const
 {
 	auto lasers = Lasers::Instance();
-	uint8_t tmp_walls[] = {lasers->ReadF(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()};
-	for (int i = 0; i < 4; ++i)
-	{
-		walls[(i + direction_) % 4] = tmp_walls[i];
-	}
+	const uint8_t threshold = cell_dimensions::depth;
+	uint8_t tmp_walls[] = {
+		        lasers->ReadF(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
+	        }, walls[4];
+	for (int i = 0; i < 4; ++i) walls[(i + direction_) % 4] = tmp_walls[i];
+	return new Walls(walls[0] < threshold, walls[1] < threshold, walls[2] < threshold, walls[3] < threshold);
 }

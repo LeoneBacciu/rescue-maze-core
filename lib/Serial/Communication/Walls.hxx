@@ -10,7 +10,7 @@ public:
 	const bool left;
 	const bool back;
 
-	Walls(const bool front, const bool right, const bool left, const bool back)
+	Walls(const bool right, const bool front, const bool left, const bool back)
 		: front(front), right(right), left(left), back(back)
 	{
 	}

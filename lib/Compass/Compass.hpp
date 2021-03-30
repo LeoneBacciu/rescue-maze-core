@@ -3,11 +3,11 @@
 #include "MainMaze/robot/lib/Serial/Communication/Directions.hxx"
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "MainMaze/robot/lib/Driver/Driver.hpp"
+#include "MainMaze/robot/lib/Serial/Communication/Walls.hxx"
 #else
 #include <Driver.hpp>
 #include <utils/Singleton.hxx>
 #include <Communication/Directions.hxx>
-
 #endif
 
 class Compass : public Singleton<Compass> {
@@ -15,5 +15,5 @@ class Compass : public Singleton<Compass> {
 
 public:
     void GoTo(Direction objective);
-    void GetWalls(uint8_t* walls) const;
+    Walls* GetWalls() const;
 };
