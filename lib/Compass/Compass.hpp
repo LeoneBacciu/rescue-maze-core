@@ -15,4 +15,5 @@ class Compass : public Singleton<Compass> {
 
 public:
     void GoTo(Direction objective);
+    void GetWalls(uint8_t* walls) const;
 };
