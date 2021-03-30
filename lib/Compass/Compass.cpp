@@ -24,7 +24,7 @@ Walls* Compass::GetWalls() const
 {
 	auto lasers = Lasers::Instance();
 	const uint8_t threshold = cell_dimensions::depth;
-	uint8_t tmp_walls[] = {
+	uint16_t tmp_walls[] = {
 		        lasers->ReadF(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
 	        }, walls[4];
 	for (int i = 0; i < 4; ++i) walls[(i + direction_) % 4] = tmp_walls[i];
