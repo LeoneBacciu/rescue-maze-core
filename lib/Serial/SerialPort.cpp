@@ -1,6 +1,7 @@
 ﻿#include "SerialPort.hpp"
 
 
+
 void SerialPort::Handshake() const {
     uint8_t buffer[3];
     this->Read(buffer);
@@ -28,6 +29,7 @@ void SerialPort::Read(uint8_t *buffer) const {
         last_char = ReadOneByte();
         buffer[index++] = last_char;
     } while (last_char != 0xff);
+    if (buffer[0] == 0xfd) throw StopConnection();
 }
 
 #if _EXECUTION_ENVIRONMENT == 0

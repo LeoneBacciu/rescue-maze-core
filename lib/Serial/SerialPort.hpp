@@ -5,6 +5,8 @@
 #include "MainMaze/robot/lib/Bus/BusConnection.hpp"
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "Core/Public/Windows/AllowWindowsPlatformTypes.h"
+#include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
+#include "Communication/Envelope.hpp"
 #include "Windows.h"
 #include <iostream>
 #include "Core/Public/Windows/HideWindowsPlatformTypes.h"
@@ -12,7 +14,6 @@
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
 #endif
-#include "Communication/Envelope.hpp"
 
 
 class SerialPort : public Singleton<SerialPort>, BusConnection

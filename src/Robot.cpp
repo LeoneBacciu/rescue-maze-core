@@ -1,9 +1,7 @@
 ﻿#include "Robot.hpp"
 
-
 #if _EXECUTION_ENVIRONMENT == 0
-#include "../lib/Compass/Compass.hpp"
-#include "../lib/Serial/SerialPort.hpp"
+#include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
 #else
 #include <Compass.hpp>
 #include <Driver.hpp>
@@ -12,30 +10,41 @@
 #include <Temp.hpp>
 #endif
 
+SerialPort* Robot::serial_;
+Compass* Robot::compass_;
+
 void Robot::Setup()
 {
-	SerialPort* serial = SerialPort::Instance();
-	Compass* compass = Compass::Instance();
+	serial_ = SerialPort::Instance();
+	compass_ = Compass::Instance();
 
-	serial->Connect("COM4", 9600);
+	serial_->Connect("COM4", 9600);
 
-	serial->Handshake();
+	serial_->Handshake();
+}
 
-	InputEnvelope* input_envelope = serial->ReadEnvelope();
-	
+bool Robot::Main()
+{
+	InputEnvelope* input_envelope;
+	try
+	{
+		input_envelope = serial_->ReadEnvelope();
+	}
+	catch (StopConnection&)
+	{
+		serial_->Close();
+		return false;
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("Serial: %d"), input_envelope->drop);
 
-	compass->GoTo(input_envelope->direction);
+	compass_->GoTo(input_envelope->direction);
 
-	Walls* walls = compass->GetWalls();
+	Walls* walls = compass_->GetWalls();
 
 	OutputEnvelope* output_envelope = new OutputEnvelope(walls, false, false);
 
-	serial->WriteEnvelope(output_envelope);
-	
-	serial->Close();
-}
+	serial_->WriteEnvelope(output_envelope);
 
-void Robot::Main()
-{
+	return true;
 }
