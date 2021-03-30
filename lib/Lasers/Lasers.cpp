@@ -205,4 +205,12 @@ int16_t Lasers::FrontDifference(const uint16_t l, const uint16_t r)
     return r - l;
 }
 
+uint16_t Lasers::ReadL() {
+    return 0;
+}
+
+uint16_t Lasers::ReadB() {
+    return 0;
+}
+
 #endif

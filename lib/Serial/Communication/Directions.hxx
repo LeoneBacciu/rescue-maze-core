@@ -4,6 +4,7 @@
 #if _EXECUTION_ENVIRONMENT == 0
 #include <tuple>
 #else
+#include <cstdint>
 #endif
 
 enum Direction : uint8_t
