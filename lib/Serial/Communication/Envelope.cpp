@@ -2,7 +2,7 @@
 
 InputEnvelope* InputEnvelope::FromBytes(uint8_t* data)
 {
-	return new InputEnvelope(DirectionFromBytes(&data[1]), data[5] != 0, data[6] != 0);
+	return new InputEnvelope(DirectionFromBytes(&data[1]), data[5] != 0, data[6]);
 }
 
 void OutputEnvelope::ToBytes(uint8_t* bytes) const

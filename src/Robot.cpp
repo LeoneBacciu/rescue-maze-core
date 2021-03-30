@@ -22,6 +22,8 @@ void Robot::Setup()
 	serial->Handshake();
 
 	InputEnvelope* envelope = serial->ReadEnvelope();
+	
+	UE_LOG(LogTemp, Warning, TEXT("Serial: %d"), envelope->drop);
 
 	compass->GoTo(envelope->direction);
 	

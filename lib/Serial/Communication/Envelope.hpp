@@ -7,9 +7,9 @@ class InputEnvelope
 public:
 	const Direction direction;
 	const bool ignore;
-	const bool drop;
+	const uint8_t drop;
 
-	InputEnvelope(const Direction direction, const bool ignore, const bool drop)
+	InputEnvelope(const Direction direction, const bool ignore, const uint8_t drop)
 		: direction(direction), ignore(ignore), drop(drop)
 	{
 	}
