@@ -27,3 +27,10 @@ Floor::FloorType Floor::Read() const
 }
 #else
 #endif
+
+Floor::FloorType Floor::Read() const {
+    uint32_t color = analogRead(FLOOR_PIN);
+    if (color > 800) return kCheckpoint;
+    if (color > 400) return kWhite;
+    return kBlack;
+}
