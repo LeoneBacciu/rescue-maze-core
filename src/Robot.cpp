@@ -10,6 +10,7 @@ Compass* Robot::compass_;
 Lasers* Robot::lasers_;
 Gyro* Robot::gyro_;
 Temp* Robot::temp_;
+Floor* Robot::floor_;
 
 void Robot::Setup()
 {
@@ -18,6 +19,7 @@ void Robot::Setup()
 	lasers_ = Lasers::Instance();
 	gyro_ = Gyro::Instance();
 	temp_ = Temp::Instance();
+	floor_ = Floor::Instance();
 
 	lasers_->Begin();
 	gyro_->Begin(25);
@@ -45,8 +47,9 @@ bool Robot::Main()
 	compass_->GoTo(input_envelope->direction);
 
 	Walls* walls = compass_->GetWalls();
+	const auto floor_type = floor_->Read();
 
-	auto* output_envelope = new OutputEnvelope(walls, false, false);
+	auto* output_envelope = new OutputEnvelope(walls, floor_type == Floor::kBlack, floor_type == Floor::kCheckpoint);
 
 	serial_->WriteEnvelope(output_envelope);
 
