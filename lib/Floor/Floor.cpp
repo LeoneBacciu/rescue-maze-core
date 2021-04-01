@@ -5,7 +5,7 @@
 Floor::FloorType Floor::Read() const
 {
 	AActor* actor = GetBus()->GetActor();
-	
+
 	FHitResult out_hit;
 
 	FVector start = actor->GetActorLocation();
@@ -15,7 +15,7 @@ Floor::FloorType Floor::Read() const
 	FCollisionQueryParams collision_params;
 
 	bool is_hit = actor->GetWorld()->LineTraceSingleByChannel(out_hit, start, end, ECC_Visibility,
-	                                                                         collision_params);
+	                                                          collision_params);
 	FloorType result = kWhite;
 	if (is_hit)
 	{
@@ -26,7 +26,6 @@ Floor::FloorType Floor::Read() const
 	return result;
 }
 #else
-#endif
 
 Floor::FloorType Floor::Read() const {
     uint32_t color = analogRead(FLOOR_PIN);
@@ -34,3 +33,4 @@ Floor::FloorType Floor::Read() const {
     if (color > 400) return kWhite;
     return kBlack;
 }
+#endif
