@@ -138,8 +138,33 @@ void Driver::Go()
 #endif
 
 		SetSpeed(speed - delta_yaw, speed + delta_yaw);
-		delayMicroseconds((near ? 10 : 20));
+		delayMicroseconds(near ? 10 : 20);
 		if (is_valid_wall) current_distance = use_front ? lasers->ReadF() : lasers->ReadB();
+	}
+	float current_angle = gyro->Yaw();
+	if (math::AngleDifference(current_angle, start_rotation) > 0)
+	{
+		SetSpeed(1, 30);
+		while (math::AngleDifference(current_angle, start_rotation) > 0)
+		{
+			current_angle = gyro->Yaw();
+			delayMicroseconds(1);
+#ifdef UEDebug
+			UE_LOG(LogTemp, Warning, TEXT("Adjusting -> starting: %f, current: %f"), start_rotation, current_angle);
+#endif
+		}
+	}
+	else
+	{
+		SetSpeed(30, 1);
+		while (math::AngleDifference(current_angle, start_rotation) < 0)
+		{
+			current_angle = gyro->Yaw();
+			delayMicroseconds(1);
+#ifdef UEDebug
+			UE_LOG(LogTemp, Warning, TEXT("Adjusting -> starting: %f, current: %f"), start_rotation, current_angle);
+#endif
+		}
 	}
 	SetSpeed(0, 0);
 }
