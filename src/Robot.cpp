@@ -33,6 +33,13 @@ void Robot::Setup()
 
 bool Robot::Main()
 {
+	Walls* walls = compass_->GetWalls();
+	const auto floor_type = floor_->Read();
+
+	auto* output_envelope = new OutputEnvelope(walls, floor_type == Floor::kBlack, floor_type == Floor::kCheckpoint);
+
+	serial_->WriteEnvelope(output_envelope);
+
 	InputEnvelope* input_envelope;
 	try
 	{
@@ -45,13 +52,5 @@ bool Robot::Main()
 	}
 
 	compass_->GoTo(input_envelope->direction);
-
-	Walls* walls = compass_->GetWalls();
-	const auto floor_type = floor_->Read();
-
-	auto* output_envelope = new OutputEnvelope(walls, floor_type == Floor::kBlack, floor_type == Floor::kCheckpoint);
-
-	serial_->WriteEnvelope(output_envelope);
-
 	return true;
 }
