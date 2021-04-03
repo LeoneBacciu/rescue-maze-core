@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #if _EXECUTION_ENVIRONMENT == 0
-#define delayMicroseconds(t) FPlatformProcess::Sleep(t / 1000.0);
+#define delayMicroseconds(t) FPlatformProcess::Sleep((t) / 1000.0);
 #define UEDebug
 #include "MainMaze/robot/lib/Gyro/Gyro.hpp"
 #include "MainMaze/robot/lib/Lasers/Lasers.hpp"
