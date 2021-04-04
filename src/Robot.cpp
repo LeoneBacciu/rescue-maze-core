@@ -14,6 +14,7 @@ Gyro* Robot::gyro_;
 Temp* Robot::temp_;
 Floor* Robot::floor_;
 bool Robot::success_ = true;
+InputEnvelope* Robot::last_envelope_ = new InputEnvelope(kRight, false, false);
 
 void Robot::Setup()
 {
@@ -54,7 +55,7 @@ bool Robot::Main()
 		return false;
 	}
 
-	success_ = compass_->GoTo(input_envelope->direction);
-	UE_LOG(LogTemp, Warning, TEXT("Success: %d"), success_);
+	success_ = compass_->GoTo(input_envelope->direction, last_envelope_->ignore, input_envelope->ignore);
+	last_envelope_ = input_envelope;
 	return true;
 }

@@ -26,6 +26,7 @@ class Robot
 	static Temp* temp_;
 	static Floor* floor_;
 	static bool success_;
+	static InputEnvelope* last_envelope_;
 public:
 	static void Setup();
 

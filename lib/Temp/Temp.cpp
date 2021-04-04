@@ -41,8 +41,7 @@ uint16_t Temp::ReadSide(FVector direction) const
 	if (is_hit)
 	{
 		AWall* wall = Cast<AWall>(out_hit.GetActor());
-		if (wall) result = wall->temp;
-		// if (wall) result = (OutHit.Distance < 30) ? wall->temp : 25;
+		if (wall) result = (out_hit.Distance < 30) ? wall->temp : 25;
 	}
 	return result;
 }

@@ -4,6 +4,8 @@
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "MainMaze/robot/lib/Driver/Driver.hpp"
 #include "MainMaze/robot/lib/Serial/Communication/Walls.hxx"
+#include "MainMaze/robot/lib/Brick/Brick.hpp"
+#include "MainMaze/robot/lib/Temp/Temp.hpp"
 #else
 
 #include <Driver.hpp>
@@ -13,11 +15,14 @@
 
 #endif
 
-class Compass : public Singleton<Compass> {
-    Direction direction_ = kTop;
+class Compass : public Singleton<Compass>
+{
+	Direction direction_ = kTop;
 
 public:
-    bool GoTo(Direction objective);
+	bool GoTo(Direction objective, const bool ignore_current = true, const bool ignore_next = true);
 
-    Walls *GetWalls() const;
+	Walls* GetWalls() const;
+
+	void Drop(const uint8_t force = 0) const;
 };
