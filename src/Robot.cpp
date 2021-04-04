@@ -1,5 +1,7 @@
 ﻿#include "Robot.hpp"
 
+#include "MainMaze/robot/lib/Brick/Brick.hpp"
+
 #if _EXECUTION_ENVIRONMENT == 0
 #include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
 #else
