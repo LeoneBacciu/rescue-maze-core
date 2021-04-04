@@ -8,7 +8,7 @@ Floor::FloorType Floor::Read() const
 
 	FHitResult out_hit;
 
-	FVector start = actor->GetActorLocation() + actor->GetActorRotation().RotateVector(FVector(10, 0, 0));
+	FVector start = actor->GetActorLocation() + actor->GetActorRotation().RotateVector(FVector(5, 0, 0));
 
 	FVector end = start + actor->GetActorUpVector() * -1000.0f;
 
