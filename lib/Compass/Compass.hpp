@@ -17,7 +17,7 @@ class Compass : public Singleton<Compass> {
     Direction direction_ = kTop;
 
 public:
-    void GoTo(Direction objective);
+    bool GoTo(Direction objective);
 
     Walls *GetWalls() const;
 };

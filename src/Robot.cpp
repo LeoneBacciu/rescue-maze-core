@@ -11,6 +11,7 @@ Lasers* Robot::lasers_;
 Gyro* Robot::gyro_;
 Temp* Robot::temp_;
 Floor* Robot::floor_;
+bool Robot::success_ = true;
 
 void Robot::Setup()
 {
@@ -36,7 +37,7 @@ bool Robot::Main()
 	Walls* walls = compass_->GetWalls();
 	const auto floor_type = floor_->Read();
 
-	auto* output_envelope = new OutputEnvelope(walls, floor_type == Floor::kBlack, floor_type == Floor::kCheckpoint);
+	auto* output_envelope = new OutputEnvelope(walls, !success_, floor_type == Floor::kCheckpoint);
 
 	serial_->WriteEnvelope(output_envelope);
 
@@ -51,6 +52,7 @@ bool Robot::Main()
 		return false;
 	}
 
-	compass_->GoTo(input_envelope->direction);
+	success_ = compass_->GoTo(input_envelope->direction);
+	UE_LOG(LogTemp, Warning, TEXT("Success: %d"), success_);
 	return true;
 }

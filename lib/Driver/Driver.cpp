@@ -76,10 +76,11 @@ void Driver::Rotate(const bool right)
 	SetSpeed(0, 0);
 }
 
-void Driver::Go()
+bool Driver::Go()
 {
 	Lasers* lasers = Lasers::Instance();
 	Gyro* gyro = Gyro::Instance();
+	Floor* floor = Floor::Instance();
 	gyro->Calibrate();
 
 	const uint16_t front_distance = lasers->ReadF(), back_distance = lasers->ReadB();
@@ -90,19 +91,25 @@ void Driver::Go()
 	const uint16_t objective = std::max(5,
 	                                    (cells + (use_front ? -1 : 1)) * cell_dimensions::depth + (
 		                                    cell_dimensions::depth - dimensions::depth) / 2);
+	const uint16_t start_cell = std::max(5,
+	                                     cells * cell_dimensions::depth + (
+		                                     cell_dimensions::depth - dimensions::depth) / 2);
 	int8_t delta_yaw = 0;
-	while (use_front ? current_distance > objective : current_distance < objective)
+	bool rear = false;
+	while (GoCondition(C_NEGATE(use_front, rear), current_distance, rear ? start_cell : objective))
 	{
 		const uint16_t c = lasers->ReadF(), r = lasers->ReadFR(), l = lasers->ReadFL();
 		const uint16_t lateral = lasers->ComputeLateralDifference();
 		const bool near = use_front ? current_distance < objective + 5 : current_distance > objective - 5;
 		uint16_t front_distance_component = std::max(1, std::max(l, std::max(c, r)) / cell_dimensions::depth);
-		uint16_t distance_component = std::max(1, current_distance / cell_dimensions::depth);
+		const uint16_t distance_component = std::max(1, current_distance / cell_dimensions::depth);
 
-		bool is_valid_wall = Lasers::IsValidWall(l, c, r);
+		const bool is_valid_wall = Lasers::IsValidWall(l, c, r);
 
-		float current_angle = gyro->Yaw();
-		float delta_angle = math::AngleDifference(current_angle, start_rotation);
+		if (!rear) rear = floor->Read() == Floor::kBlack;
+
+		const float current_angle = gyro->Yaw();
+		const float delta_angle = math::AngleDifference(current_angle, start_rotation);
 
 		int speed = abs(delta_angle) > 10 ? kSlow : near ? kMedium : kFast;
 		delta_yaw = delta_angle;
@@ -136,7 +143,8 @@ void Driver::Go()
 		       is_valid_wall,
 		       start_rotation, current_angle, delta_angle);
 #endif
-
+		if (rear) UE_LOG(LogTemp, Warning, TEXT("Rear -> current: %d, objective: %d"), current_distance, start_cell);
+		if (rear) speed *= -1;
 		SetSpeed(speed - delta_yaw, speed + delta_yaw);
 		delayMicroseconds(near ? 10 : 20);
 		if (is_valid_wall) current_distance = use_front ? lasers->ReadF() : lasers->ReadB();
@@ -144,7 +152,7 @@ void Driver::Go()
 	float current_angle = gyro->Yaw();
 	if (math::AngleDifference(current_angle, start_rotation) > 0)
 	{
-		SetSpeed(1, 30);
+		SetSpeed(-15, 15);
 		while (math::AngleDifference(current_angle, start_rotation) > 0)
 		{
 			current_angle = gyro->Yaw();
@@ -156,7 +164,7 @@ void Driver::Go()
 	}
 	else
 	{
-		SetSpeed(30, 1);
+		SetSpeed(15, -15);
 		while (math::AngleDifference(current_angle, start_rotation) < 0)
 		{
 			current_angle = gyro->Yaw();
@@ -167,6 +175,7 @@ void Driver::Go()
 		}
 	}
 	SetSpeed(0, 0);
+	return !rear;
 }
 
 bool Driver::RightTurnCondition(const float start, const float current, const float goal)
@@ -186,6 +195,12 @@ bool Driver::LeftTurnCondition(const float start, const float current, const flo
 	}
 	return 0 <= current && current <= start || goal <= current && current <= 360;
 }
+
+bool Driver::GoCondition(const bool use_front, const uint16_t current, const uint16_t objective)
+{
+	return use_front ? current > objective : current < objective;
+}
+
 
 #if _EXECUTION_ENVIRONMENT == 0
 void Driver::SetSpeed(int l, int r)

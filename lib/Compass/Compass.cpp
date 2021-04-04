@@ -1,6 +1,6 @@
 #include "Compass.hpp"
 
-void Compass::GoTo(const Direction objective)
+bool Compass::GoTo(const Direction objective)
 {
 	const int difference = direction_ - objective;
 	if (abs(difference) == 2)
@@ -17,7 +17,7 @@ void Compass::GoTo(const Direction objective)
 		Driver::Rotate(side);
 	}
 	direction_ = objective;
-	Driver::Go();
+	return Driver::Go();
 }
 
 Walls* Compass::GetWalls() const

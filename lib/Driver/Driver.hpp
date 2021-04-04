@@ -2,13 +2,14 @@
 
 #if _EXECUTION_ENVIRONMENT == 0
 #define delayMicroseconds(t) FPlatformProcess::Sleep((t) / 1000.0);
-#define UEDebug
+// #define UEDebug
 #include "MainMaze/robot/lib/Gyro/Gyro.hpp"
 #include "MainMaze/robot/lib/Lasers/Lasers.hpp"
 #include "MainMaze/robot/lib/Bus/BusConnection.hpp"
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "MainMaze/robot/lib/Serial/Communication/Directions.hxx"
 #include "MainMaze/robot/lib/extra/utils/Math.hxx"
+#include "MainMaze/robot/lib/Floor/Floor.hpp"
 #else
 #define PWM_R PB3
 #define INV_R1 PB12
@@ -22,6 +23,7 @@
 #include <utils/Singleton.hxx>
 #include <utils/Math.hxx>
 #endif
+#define C_NEGATE(a, b) (!a&b || a&!b)
 
 class Driver : BusConnection
 {
@@ -34,9 +36,10 @@ class Driver : BusConnection
 
 public:
 	static void Rotate(bool right);
-	static void Go();
+	static bool Go();
 	static bool RightTurnCondition(float start, float current, float goal);
 	static bool LeftTurnCondition(float start, float current, float goal);
+	static bool GoCondition(bool use_front, uint16_t current, uint16_t objective);
 
 private:
 	static void SetSpeed(int l, int r);

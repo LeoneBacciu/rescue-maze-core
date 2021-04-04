@@ -25,6 +25,7 @@ class Robot
 	static Gyro* gyro_;
 	static Temp* temp_;
 	static Floor* floor_;
+	static bool success_;
 public:
 	static void Setup();
 
