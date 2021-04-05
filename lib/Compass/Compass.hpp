@@ -6,6 +6,7 @@
 #include "MainMaze/robot/lib/Serial/Communication/Walls.hxx"
 #include "MainMaze/robot/lib/Brick/Brick.hpp"
 #include "MainMaze/robot/lib/Temp/Temp.hpp"
+#include "MainMaze/robot/lib/Logger/Logger.hpp"
 #else
 
 #include <Driver.hpp>

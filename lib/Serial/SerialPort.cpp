@@ -44,9 +44,10 @@ void SerialPort::Connect(const char* port_name, const int baud_rate)
                                  nullptr);
     if (this->handler_ == INVALID_HANDLE_VALUE)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Error opening serial port "));
+        Logger::Error(kSerial, "error opening serial port %s", port_name);
         return;
     }
+    Logger::Info(kSerial, "serial port %s open", port_name);
 
     DCB dcb_serial_params = {0};
     dcb_serial_params.DCBlength = sizeof(dcb_serial_params);

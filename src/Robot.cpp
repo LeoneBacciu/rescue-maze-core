@@ -20,6 +20,8 @@ void Robot::Setup()
 	floor_ = Floor::Instance();
 	brick_ = Brick::Instance();
 
+	Logger::AllowAllSources();
+	
 	lasers_->Begin();
     brick_->Begin();
 	gyro_->Begin(25);

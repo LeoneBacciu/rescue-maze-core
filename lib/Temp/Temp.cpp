@@ -6,6 +6,7 @@ void Temp::Calibrate()
 {
 	const GeometricPair<uint16_t> values = Read();
 	threshold = (values.left + values.right) / 2;
+	Logger::Info(kTemp, "calibrated threshold: %d", threshold);
 }
 
 GeometricPair<uint16_t> Temp::Read()
@@ -19,6 +20,7 @@ GeometricPair<uint16_t> Temp::Read()
 GeometricPair<bool> Temp::IsHot()
 {
 	const auto measures = Read();
+	Logger::Info(kTemp, "temp: %d, %d", measures.left, measures.right);
 	return {
 		measures.left > threshold,
 		measures.right > threshold

@@ -6,6 +6,7 @@
 #include "MainMaze/robot/lib/Bus/BusConnection.hpp"
 #include "MainMaze/robot/lib/extra/utils/GeometricPair.hxx"
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
+#include "MainMaze/robot/lib/Logger/Logger.hpp"
 #else
 #define ADDR_L 0x5A
 #define ADDR_R 0x5B

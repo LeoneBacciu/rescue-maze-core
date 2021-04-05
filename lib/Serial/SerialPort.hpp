@@ -6,6 +6,7 @@
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "Core/Public/Windows/AllowWindowsPlatformTypes.h"
 #include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
+#include "MainMaze/robot/lib/Logger/Logger.hpp"
 #include "Communication/Envelope.hpp"
 #include "Windows.h"
 #include <iostream>

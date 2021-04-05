@@ -7,6 +7,7 @@
 #include "MainMaze/robot/lib/Temp/Temp.hpp"
 #include "MainMaze/robot/lib/Brick/Brick.hpp"
 #include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
+#include "MainMaze/robot/lib/Logger/Logger.hpp"
 #else
 
 #include <SerialPort.hpp>
