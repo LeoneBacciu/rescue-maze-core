@@ -18,6 +18,7 @@
 #define INV_L1 PB14
 #define INV_L2 PB15
 #include <Gyro.hpp>
+#include <Floor.hpp>
 #include <Lasers.hpp>
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>

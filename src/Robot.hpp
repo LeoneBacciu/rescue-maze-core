@@ -5,6 +5,8 @@
 #include "MainMaze/robot/lib/Floor/Floor.hpp"
 #include "MainMaze/robot/lib/Serial/SerialPort.hpp"
 #include "MainMaze/robot/lib/Temp/Temp.hpp"
+#include "MainMaze/robot/lib/Brick/Brick.hpp"
+#include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
 #else
 
 #include <SerialPort.hpp>
@@ -13,6 +15,7 @@
 #include <Gyro.hpp>
 #include <Temp.hpp>
 #include <Floor.hpp>
+#include <Brick.hpp>
 
 #endif
 
@@ -25,6 +28,7 @@ class Robot
 	static Gyro* gyro_;
 	static Temp* temp_;
 	static Floor* floor_;
+	static Brick* brick_;
 	static bool success_;
 	static InputEnvelope* last_envelope_;
 public:

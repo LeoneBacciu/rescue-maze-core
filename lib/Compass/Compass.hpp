@@ -12,6 +12,8 @@
 #include <utils/Singleton.hxx>
 #include <Communication/Directions.hxx>
 #include <Communication/Walls.hxx>
+#include <Temp.hpp>
+#include <Brick.hpp>
 
 #endif
 

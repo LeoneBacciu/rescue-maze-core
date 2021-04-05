@@ -143,7 +143,6 @@ bool Driver::Go()
 		       is_valid_wall,
 		       start_rotation, current_angle, delta_angle);
 #endif
-		if (rear) UE_LOG(LogTemp, Warning, TEXT("Rear -> current: %d, objective: %d"), current_distance, start_cell);
 		if (rear) speed *= -1;
 		SetSpeed(speed - delta_yaw, speed + delta_yaw);
 		delayMicroseconds(near ? 10 : 20);

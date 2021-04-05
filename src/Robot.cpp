@@ -1,18 +1,12 @@
 ﻿#include "Robot.hpp"
 
-#include "MainMaze/robot/lib/Brick/Brick.hpp"
-
-#if _EXECUTION_ENVIRONMENT == 0
-#include "MainMaze/robot/lib/extra/utils/Exceptions.hxx"
-#else
-#endif
-
 SerialPort* Robot::serial_;
 Compass* Robot::compass_;
 Lasers* Robot::lasers_;
 Gyro* Robot::gyro_;
 Temp* Robot::temp_;
 Floor* Robot::floor_;
+Brick* Robot::brick_;
 bool Robot::success_ = true;
 InputEnvelope* Robot::last_envelope_ = new InputEnvelope(kRight, false, false);
 
@@ -24,8 +18,10 @@ void Robot::Setup()
 	gyro_ = Gyro::Instance();
 	temp_ = Temp::Instance();
 	floor_ = Floor::Instance();
+	brick_ = Brick::Instance();
 
 	lasers_->Begin();
+    brick_->Begin();
 	gyro_->Begin(25);
 	gyro_->Calibrate();
 	temp_->Calibrate();
