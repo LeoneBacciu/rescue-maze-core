@@ -32,7 +32,7 @@ void Logger::Verbose(Source source, const char *format, ...) {
     va_end(args);
 }
 
-void Logger::Info(const Source source, const char *format, ...) {
+void Logger::Info(Source source, const char *format, ...) {
     if (verbosity_ <= kInfo && !allow_list_[source]) return;
     va_list args;
     va_start(args, format);
@@ -40,7 +40,7 @@ void Logger::Info(const Source source, const char *format, ...) {
     va_end(args);
 }
 
-void Logger::Warn(const Source source, const char *format, ...) {
+void Logger::Warn(Source source, const char *format, ...) {
     if (verbosity_ <= kWarn && !allow_list_[source]) return;
     va_list args;
     va_start(args, format);
@@ -48,7 +48,7 @@ void Logger::Warn(const Source source, const char *format, ...) {
     va_end(args);
 }
 
-void Logger::Error(const Source source, const char *format, ...) {
+void Logger::Error(Source source, const char *format, ...) {
     if (verbosity_ <= kError && !allow_list_[source]) return;
     va_list args;
     va_start(args, format);
@@ -59,7 +59,7 @@ void Logger::Error(const Source source, const char *format, ...) {
 #if _EXECUTION_ENVIRONMENT == 0
 void Logger::Print(const char *verb, Source source, const char *format, va_list args) {
     char buffer[128];
-    vsprintf(buffer, format, args);
+    vsprintf_s(buffer, format, args);
     UE_LOG(LogTemp, Warning, TEXT("[%s] - [%s] - {%s}"), *FString(verb), *FString(source_to_string_[source]), *FString(buffer));
 }
 #else
