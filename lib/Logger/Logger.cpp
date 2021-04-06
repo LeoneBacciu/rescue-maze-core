@@ -1,66 +1,73 @@
 #include "Logger.hpp"
 
-char* Logger::source_to_string_[] = {"brick", "compass", "drivers", "floor", "gyro", "lasers", "serial", "temp"};
+char const *Logger::source_to_string_[] = {"brick", "compass", "drivers", "floor", "gyro", "lasers", "serial", "temp"};
 bool Logger::allow_list_[] = {false, false, false, false, false, false, false, false};
+Verbosity Logger::verbosity_ = kInfo;
 
-void Logger::AllowSource(const Source source)
-{
-	allow_list_[source] = true;
+void Logger::SetVerbosity(Verbosity verbosity) {
+    verbosity_ = verbosity;
 }
 
-void Logger::DenySource(const Source source)
-{
-	allow_list_[source] = false;
+void Logger::AllowSource(const Source source) {
+    allow_list_[source] = true;
 }
 
-void Logger::AllowAllSources()
-{
-	for (int i = 0; i < sizeof allow_list_ / sizeof allow_list_[0]; ++i)
-	{
-		allow_list_[i] = true;
-	}
+void Logger::DenySource(const Source source) {
+    allow_list_[source] = false;
 }
 
-void Logger::DenyAllSources()
-{
-	for (int i = 0; i < sizeof allow_list_ / sizeof allow_list_[0]; ++i)
-	{
-		allow_list_[i] = false;
-	}
+void Logger::AllowAllSources() {
+    for (bool &i : allow_list_) i = true;
 }
 
-void Logger::Info(const Source source, const char* format, ...)
-{
-	if (!allow_list_[source]) return;
-
-	char buffer[256];
-	va_list args;
-	va_start(args, format);
-	vsprintf_s(buffer, format, args);
-	va_end(args);
-	UE_LOG(LogTemp, Display, TEXT("[info] - [%s] - {%s}"), *FString(source_to_string_[source]), *FString(buffer));
+void Logger::DenyAllSources() {
+    for (bool &i : allow_list_) i = false;
 }
 
-void Logger::Warn(const Source source, const char* format, ...)
-{
-	if (!allow_list_[source]) return;
-
-	char buffer[256];
-	va_list args;
-	va_start(args, format);
-	vsprintf_s(buffer, format, args);
-	va_end(args);
-	UE_LOG(LogTemp, Warning, TEXT("[warn] - [%s] - {%s}"), *FString(source_to_string_[source]), *FString(buffer));
+void Logger::Verbose(Source source, const char *format, ...) {
+    if (verbosity_ <= kVerbose && !allow_list_[source]) return;
+    va_list args;
+    va_start(args, format);
+    Print("verbose", source, format, args);
+    va_end(args);
 }
 
-void Logger::Error(const Source source, const char* format, ...)
-{
-	if (!allow_list_[source]) return;
-
-	char buffer[256];
-	va_list args;
-	va_start(args, format);
-	vsprintf_s(buffer, format, args);
-	va_end(args);
-	UE_LOG(LogTemp, Error, TEXT("[error] - [%s] - {%s}"), *FString(source_to_string_[source]), *FString(buffer));
+void Logger::Info(const Source source, const char *format, ...) {
+    if (verbosity_ <= kInfo && !allow_list_[source]) return;
+    va_list args;
+    va_start(args, format);
+    Print("info", source, format, args);
+    va_end(args);
 }
+
+void Logger::Warn(const Source source, const char *format, ...) {
+    if (verbosity_ <= kWarn && !allow_list_[source]) return;
+    va_list args;
+    va_start(args, format);
+    Print("warn", source, format, args);
+    va_end(args);
+}
+
+void Logger::Error(const Source source, const char *format, ...) {
+    if (verbosity_ <= kError && !allow_list_[source]) return;
+    va_list args;
+    va_start(args, format);
+    Print("error", source, format, args);
+    va_end(args);
+}
+
+#if _EXECUTION_ENVIRONMENT == 0
+void Logger::Print(const char *verb, Source source, const char *format, va_list args) {
+    char buffer[128];
+    vsprintf(buffer, format, args);
+    UE_LOG(LogTemp, Warning, TEXT("[%s] - [%s] - {%s}"), *FString(verb), *FString(source_to_string_[source]), *FString(buffer));
+}
+#else
+
+void Logger::Print(const char *verb, Source source, const char *format, va_list args) {
+    char buffer[128];
+    vsprintf(buffer, format, args);
+    Serial3.printf("[%s] - [%s] - {%s}", verb, source, buffer);
+}
+
+#endif

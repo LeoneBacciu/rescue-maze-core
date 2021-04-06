@@ -15,6 +15,7 @@
 #include <Communication/Walls.hxx>
 #include <Temp.hpp>
 #include <Brick.hpp>
+#include <Logger.hpp>
 
 #endif
 
@@ -23,9 +24,9 @@ class Compass : public Singleton<Compass>
 	Direction direction_ = kTop;
 
 public:
-	bool GoTo(Direction objective, const bool ignore_current = true, const bool ignore_next = true);
+	bool GoTo(Direction objective, bool ignore_current = true, bool ignore_next = true);
 
 	Walls* GetWalls() const;
 
-	void Drop(const uint8_t force = 0) const;
+	void Drop(uint8_t force = 0) const;
 };

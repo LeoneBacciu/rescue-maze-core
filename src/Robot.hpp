@@ -17,6 +17,7 @@
 #include <Temp.hpp>
 #include <Floor.hpp>
 #include <Brick.hpp>
+#include <Logger.hpp>
 
 #endif
 
