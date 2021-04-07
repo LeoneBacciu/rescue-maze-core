@@ -29,7 +29,7 @@ enum Verbosity : uint8_t
 	kVerbose,
 	kInfo,
 	kWarn,
-	kError,
+	kError
 };
 
 class Logger
@@ -62,16 +62,13 @@ private:
 	static void Print(const char* verb, Source source, const char* format, va_list args);
 };
 
-inline std::string IntArrayToString(uint8_t* in, const size_t size, const size_t hex_len = 2)
+template<typename T> void ToCharArray(T* in, char* out, const size_t size)
 {
 	static const char* digits = "0123456789ABCDEF";
-	std::string out;
 	for (int l = 0; l < size; ++l)
 	{
-		std::string rc(hex_len, '0');
-		for (size_t i = 0, j = (hex_len - 1) * 4; i < hex_len; ++i, j -= 4)
-			rc[i] = digits[(in[l] >> j) & 0x0f];
-		out += rc;
+		if (l != 0) out[3 * l - 1] = ':';
+		for (uint8_t i = 0, j = 4; i < 2; ++i, j -= 4)
+			out[i + 3 * l] = digits[in[l] >> j & 0x0f];
 	}
-	return out;
 }

@@ -25,7 +25,7 @@ void Logger::DenyAllSources() {
 }
 
 void Logger::Verbose(Source source, const char *format, ...) {
-    if (verbosity_ <= kVerbose && !allow_list_[source]) return;
+    if (verbosity_ > kVerbose || !allow_list_[source]) return;
     va_list args;
     va_start(args, format);
     Print("verbose", source, format, args);
@@ -33,7 +33,7 @@ void Logger::Verbose(Source source, const char *format, ...) {
 }
 
 void Logger::Info(Source source, const char *format, ...) {
-    if (verbosity_ <= kInfo && !allow_list_[source]) return;
+    if (verbosity_ > kInfo || !allow_list_[source]) return;
     va_list args;
     va_start(args, format);
     Print("info", source, format, args);
@@ -41,7 +41,7 @@ void Logger::Info(Source source, const char *format, ...) {
 }
 
 void Logger::Warn(Source source, const char *format, ...) {
-    if (verbosity_ <= kWarn && !allow_list_[source]) return;
+    if (verbosity_ > kWarn || !allow_list_[source]) return;
     va_list args;
     va_start(args, format);
     Print("warn", source, format, args);
@@ -49,7 +49,7 @@ void Logger::Warn(Source source, const char *format, ...) {
 }
 
 void Logger::Error(Source source, const char *format, ...) {
-    if (verbosity_ <= kError && !allow_list_[source]) return;
+    if (verbosity_ > kError || !allow_list_[source]) return;
     va_list args;
     va_start(args, format);
     Print("error", source, format, args);
