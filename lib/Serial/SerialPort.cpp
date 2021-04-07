@@ -13,7 +13,9 @@ InputEnvelope* SerialPort::ReadEnvelope() const
 {
     uint8_t buffer[in_env_length];
     this->Read(buffer);
-    Logger::Info(kSerial, "reading: %s", IntArrayToString(buffer, in_env_length).c_str());
+    char representation[in_env_length*3-1];
+    ToCharArray(buffer, representation, in_env_length);
+    Logger::Info(kSerial, "reading: %s", representation);
     return InputEnvelope::FromBytes(buffer);
 }
 
@@ -21,7 +23,9 @@ void SerialPort::WriteEnvelope(OutputEnvelope* envelope) const
 {
     uint8_t buffer[out_env_length];
     envelope->ToBytes(buffer);
-    Logger::Info(kSerial, "writing: %s", IntArrayToString(buffer, out_env_length).c_str());
+    char representation[out_env_length*3-1];
+    ToCharArray(buffer, representation, out_env_length);
+    Logger::Info(kSerial, "writing: %s", representation);
     this->Write(buffer, out_env_length);
 }
 

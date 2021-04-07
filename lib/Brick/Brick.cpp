@@ -7,12 +7,12 @@ void Brick::Begin() {
 
 void Brick::Drop(const uint8_t quantity)
 {
+    Logger::Info(kBrick, "dropping %d kit", quantity);
     for (int i = 0; i < quantity; ++i)
     {
-        Logger::Info(kBrick, "dropping kit...");
         GetBus()->Drop();
-        Logger::Info(kBrick, "kit dropped");
         delayMicroseconds(1000);
+        Logger::Verbose(kBrick, "kit %d dropped", i);
     };
 }
 #else
@@ -22,13 +22,13 @@ void Brick::Begin() {
 }
 
 void Brick::Drop(uint8_t quantity) {
+    Logger::Info(kBrick, "dropping %d kit", quantity);
     for (int i = 0; i < quantity; ++i) {
-        Logger::Info(kBrick, "dropping kit...");
         servo.write(45);
         delay(30);
         servo.write(0);
         delay(30);
-        Logger::Info(kBrick, "kit dropped");
+        Logger::Verbose(kBrick, "kit %d dropped", i);
     }
 }
 
