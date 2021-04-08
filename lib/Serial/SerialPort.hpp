@@ -17,6 +17,7 @@
 #include <utils/Singleton.hxx>
 #include <utils/Exceptions.hxx>
 #include <Communication/Envelope.hpp>
+#include <Logger.hpp>
 
 #endif
 

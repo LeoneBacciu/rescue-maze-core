@@ -62,10 +62,10 @@ private:
 	static void Print(const char* verb, Source source, const char* format, va_list args);
 };
 
-template<typename T> void ToCharArray(T* in, char* out, const size_t size)
+template<typename T> void ToCharArray(T* in, char* out, const uint16_t size)
 {
 	static const char* digits = "0123456789ABCDEF";
-	for (int l = 0; l < size; ++l)
+	for (uint16_t l = 0; l < size; ++l)
 	{
 		if (l != 0) out[3 * l - 1] = ':';
 		for (uint8_t i = 0, j = 4; i < 2; ++i, j -= 4)
