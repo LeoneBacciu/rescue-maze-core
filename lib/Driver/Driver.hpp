@@ -10,6 +10,7 @@
 #include "MainMaze/robot/lib/Serial/Communication/Directions.hxx"
 #include "MainMaze/robot/lib/extra/utils/Math.hxx"
 #include "MainMaze/robot/lib/Floor/Floor.hpp"
+#include "MainMaze/robot/lib/Logger/Logger.hpp"
 #else
 #define PWM_R PB3
 #define INV_R1 PB12

@@ -5,11 +5,13 @@ void Driver::Rotate(const bool right)
 {
 	Lasers* lasers = Lasers::Instance();
 	Gyro* gyro = Gyro::Instance();
+	Logger::Info(kDrivers, "rotating %s", right ? "right" : "left");
 	const int8_t direction_multiplier = right ? 1 : -1;
 	float c = lasers->ReadF(), r = lasers->ReadFR(), l = lasers->ReadFL();
 
 	if (Lasers::IsValidWall(l, c, r))
 	{
+		Logger::Info(kDrivers, "aligning front with lasers");
 		if (right)
 		{
 			SetSpeed(-20, 20);
@@ -43,10 +45,9 @@ void Driver::Rotate(const bool right)
 	{
 		delayMicroseconds(100);
 		current = gyro->Yaw();
-#ifdef UEDebug
-		UE_LOG(LogTemp, Warning, TEXT("MAIN -> starting: %f, objective: %f, current: %f"), start, goal, current);
-#endif
+		Logger::Verbose(kDrivers, "main rotation -> start: %f, obj: %f, curr: %f", start, goal, current);
 	}
+	Logger::Info(kDrivers, "final rotate adjustment");
 	c = lasers->ReadF(), r = lasers->ReadFR(), l = lasers->ReadFL();
 	SetSpeed(10 * direction_multiplier, -10 * direction_multiplier);
 	int16_t diff = lasers->ComputeFrontDifference();
@@ -56,9 +57,7 @@ void Driver::Rotate(const bool right)
 		{
 			delayMicroseconds(1);
 			diff = lasers->ComputeFrontDifference();
-#ifdef UEDebug
-			UE_LOG(LogTemp, Warning, TEXT("FINAL -> difference: %d"), diff);
-#endif
+			Logger::Verbose(kDrivers, "final rotation (lasers) -> diff: %d", diff);
 		}
 	}
 	else
@@ -68,11 +67,10 @@ void Driver::Rotate(const bool right)
 		{
 			delayMicroseconds(1);
 			current = gyro->Yaw();
-#ifdef UEDebug
-			UE_LOG(LogTemp, Warning, TEXT("FINAL -> starting: %f, objective: %f, current: %f"), start, goal, current);
-#endif
+			Logger::Verbose(kDrivers, "final rotation -> start: %f, obj: %f, curr: %f", start, goal, current);
 		}
 	}
+	Logger::Info(kDrivers, "rotation finished");
 	SetSpeed(0, 0);
 }
 
@@ -94,6 +92,8 @@ bool Driver::Go()
 	const uint16_t start_cell = std::max(5,
 	                                     cells * cell_dimensions::depth + (
 		                                     cell_dimensions::depth - dimensions::depth) / 2);
+	Logger::Info(kDrivers, "go forward -> start: %d, cells: %d, obj: %d, rot: %f", current_distance, cells, objective,
+	             start_rotation);
 	int8_t delta_yaw = 0;
 	bool rear = false;
 	while (GoCondition(C_NEGATE(use_front, rear), current_distance, rear ? start_cell : objective))
@@ -132,23 +132,18 @@ bool Driver::Go()
 			                         static_cast<int>(max_lateral_compensation_speed)) / (is_valid_wall ? 1 : 2);
 		}
 
-#ifdef UEDebug
-		UE_LOG(LogTemp, Warning,
-		       TEXT(
-			       "objective: %d, missingcells: %d, distance: %d, speed: %d, deltayaw: %d, dc: %d, fdc: %d, laser: %hs, near: %d"
-		       ),
-		       objective, cells, current_distance, speed, delta_yaw, distance_component, front_distance_component,
-		       use_front?"front":"back", near);
-		UE_LOG(LogTemp, Warning, TEXT("valid_wall: %d, startangle: %f, currentangle: %f, anglediff: %f"),
-		       is_valid_wall,
-		       start_rotation, current_angle, delta_angle);
-#endif
+		Logger::Verbose(
+			kDrivers, "go forward lasers -> curr: %d, obj: %d, deltayaw: %d, speed: %d, near: %d, valid: %d",
+			current_distance, objective, delta_yaw, speed, near, is_valid_wall);
+		Logger::Verbose(kDrivers, "go forward gyro   -> start: %f, curr: %f, diff: %f", start_rotation, current_angle,
+		                delta_angle);
 		if (rear) speed *= -1;
 		SetSpeed(speed - delta_yaw, speed + delta_yaw);
 		delayMicroseconds(near ? 10 : 20);
 		if (is_valid_wall) current_distance = use_front ? lasers->ReadF() : lasers->ReadB();
 	}
 	float current_angle = gyro->Yaw();
+	Logger::Info(kDrivers, "final go adjusting");
 	if (math::AngleDifference(current_angle, start_rotation) > 0)
 	{
 		SetSpeed(-15, 15);
@@ -156,9 +151,7 @@ bool Driver::Go()
 		{
 			current_angle = gyro->Yaw();
 			delayMicroseconds(1);
-#ifdef UEDebug
-			UE_LOG(LogTemp, Warning, TEXT("Adjusting -> starting: %f, current: %f"), start_rotation, current_angle);
-#endif
+			Logger::Verbose(kDrivers, "Adjusting -> starting: %f, current: %f", start_rotation, current_angle);
 		}
 	}
 	else
@@ -168,12 +161,11 @@ bool Driver::Go()
 		{
 			current_angle = gyro->Yaw();
 			delayMicroseconds(1);
-#ifdef UEDebug
-			UE_LOG(LogTemp, Warning, TEXT("Adjusting -> starting: %f, current: %f"), start_rotation, current_angle);
-#endif
+			Logger::Verbose(kDrivers, "Adjusting -> starting: %f, current: %f", start_rotation, current_angle);
 		}
 	}
 	SetSpeed(0, 0);
+	Logger::Info(kDrivers, "go forward finished%s", rear ? " (aborted)" : "");
 	return !rear;
 }
 

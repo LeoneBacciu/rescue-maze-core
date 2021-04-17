@@ -35,6 +35,10 @@ public:
     InputEnvelope *ReadEnvelope() const;
 
     void WriteEnvelope(OutputEnvelope *envelope) const;
+    
+    uint8_t ReadHalfWayDrop() const;
+
+    void WriteHalfWayPoint(const bool ignore) const;
 
     void Read(uint8_t *buffer) const;
 

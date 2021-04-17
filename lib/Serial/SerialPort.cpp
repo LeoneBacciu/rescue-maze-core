@@ -1,8 +1,8 @@
 ﻿#include "SerialPort.hpp"
 
 
-
-void SerialPort::Handshake() const {
+void SerialPort::Handshake() const
+{
     uint8_t buffer[3];
     this->Read(buffer);
     this->Write(buffer, 3);
@@ -13,7 +13,7 @@ InputEnvelope* SerialPort::ReadEnvelope() const
 {
     uint8_t buffer[in_env_length];
     this->Read(buffer);
-    char representation[in_env_length*3-1];
+    char representation[in_env_length * 3 - 1];
     ToCharArray(buffer, representation, in_env_length);
     Logger::Info(kSerial, "reading: %s", representation);
     return InputEnvelope::FromBytes(buffer);
@@ -23,19 +23,41 @@ void SerialPort::WriteEnvelope(OutputEnvelope* envelope) const
 {
     uint8_t buffer[out_env_length];
     envelope->ToBytes(buffer);
-    char representation[out_env_length*3-1];
+    char representation[out_env_length * 3 - 1];
     ToCharArray(buffer, representation, out_env_length);
     Logger::Info(kSerial, "writing: %s", representation);
     this->Write(buffer, out_env_length);
 }
 
-void SerialPort::Read(uint8_t *buffer) const {
+uint8_t SerialPort::ReadHalfWayDrop() const
+{
+    uint8_t buffer[3];
+    this->Read(buffer);
+    char representation[8];
+    ToCharArray(buffer, representation, 3);
+    Logger::Info(kSerial, "reading halfway: %s", representation);
+    return buffer[1];
+}
+
+void SerialPort::WriteHalfWayPoint(const bool ignore) const
+{
+    uint8_t buffer[] = {0xfd, ignore ? 0 : 1, 0xff};
+    char representation[8];
+    ToCharArray(buffer, representation, 3);
+    Logger::Info(kSerial, "writing halfway: %s", representation);
+    this->Write(buffer, 3);
+}
+
+void SerialPort::Read(uint8_t* buffer) const
+{
     uint8_t last_char, index = 0;
-    do {
+    do
+    {
         last_char = ReadOneByte();
         buffer[index++] = last_char;
-    } while (last_char != 0xff);
-    if (buffer[0] == 0xfd) throw StopConnection();
+    }
+    while (last_char != 0xff);
+    if (buffer[0] == 0xfe) throw StopConnection();
 }
 
 #if _EXECUTION_ENVIRONMENT == 0
