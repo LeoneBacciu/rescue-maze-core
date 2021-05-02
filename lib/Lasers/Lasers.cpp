@@ -31,9 +31,11 @@ int16_t Lasers::ComputeFrontDifference()
     return ReadFR() - ReadFL();
 }
 
-int16_t Lasers::ComputeLateralDifference()
+int16_t Lasers::ComputeLateralDifference(const uint16_t threshold)
 {
-    return fmod(ReadL(), cell_dimensions::depth) - fmod(ReadR(), cell_dimensions::depth);
+    const uint16_t l = ReadL(), r = ReadR();
+    if (l > threshold || r > threshold) return 0;
+    return l % cell_dimensions::depth - r % cell_dimensions::depth;
 }
 
 uint16_t Lasers::ReadFL()
@@ -97,7 +99,7 @@ uint16_t Lasers::Read(FVector direction, float delta_y, bool draw) const
     float result = 8192;
     if (is_hit)
     {
-        result = out_hit.Distance;
+        result = out_hit.Distance * 10;
     }
     return MakeError(result);
 }

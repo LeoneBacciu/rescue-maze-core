@@ -1,8 +1,16 @@
 #include "Floor.hpp"
 
+Floor::FloorType Floor::Read() const
+{
+    const uint32_t color = ReadRaw();
+    if (color > 800) return kBlack;
+    if (color < 19) return kCheckpoint;
+    return kWhite;
+}
 
 #if _EXECUTION_ENVIRONMENT == 0
-Floor::FloorType Floor::Read() const
+
+uint32_t Floor::ReadRaw() const
 {
     AActor* actor = GetBus()->GetActor();
 
@@ -16,23 +24,17 @@ Floor::FloorType Floor::Read() const
 
     bool is_hit = actor->GetWorld()->LineTraceSingleByChannel(out_hit, start, end, ECC_Visibility,
                                                               collision_params);
-    FloorType result = kWhite;
+    uint32_t result = 50;
     if (is_hit)
     {
         ACell* cell = Cast<ACell>(out_hit.GetActor());
-        if (cell->IsBlack()) result = kBlack;
-        if (cell->IsCheckpoint()) result = kCheckpoint;
+        if (cell->IsBlack()) result = 850;
+        if (cell->IsCheckpoint()) result = 15;
     }
     return result;
 }
-#else
 
-Floor::FloorType Floor::Read() const {
-    uint32_t color = ReadRaw();
-    if (color > 800) return kBlack;
-    if (color < 19) return kCheckpoint;
-    return kWhite;
-}
+#else
 
 uint32_t Floor::ReadRaw() const {
     return analogRead(FLOOR_PIN);

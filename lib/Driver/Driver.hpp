@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 #if _EXECUTION_ENVIRONMENT == 0
-#define delayMicroseconds(t) FPlatformProcess::Sleep((t) / 1000.0);
+#include <chrono>
+#define delay(t) FPlatformProcess::Sleep((t) / 1000.0);
+#define millis() std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()
 // #define UEDebug
 #include "MainMaze/robot/lib/Gyro/Gyro.hpp"
 #include "MainMaze/robot/lib/Lasers/Lasers.hpp"

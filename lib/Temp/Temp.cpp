@@ -4,7 +4,7 @@
 #if _EXECUTION_ENVIRONMENT == 0
 void Temp::Calibrate()
 {
-    const GeometricPair<uint16_t> values = Read();
+    const GeometricPair<float> values = Read();
     threshold = (values.left + values.right) / 2;
     Logger::Info(kTemp, "calibrated threshold: %d", threshold);
 }

@@ -34,7 +34,7 @@ public:
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
-    float drift_ = 3;
+    float drift_ = 5;
     bool error_ = true;
     float CalculateError();
     long long last_reset_time_ = 0;

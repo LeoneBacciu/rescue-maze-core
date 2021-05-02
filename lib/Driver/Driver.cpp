@@ -2,8 +2,8 @@
 
 
 void Driver::Rotate(const bool right) {
-    Lasers *lasers = Lasers::Instance();
-    Gyro *gyro = Gyro::Instance();
+    Lasers* lasers = Lasers::Instance();
+    Gyro* gyro = Gyro::Instance();
 
     lasers->StartContinuous();
 
@@ -20,11 +20,19 @@ void Driver::Rotate(const bool right) {
     SetSpeed(kRotateFast * direction_multiplier, -kRotateFast * direction_multiplier);
 
     const auto turn_condition = right ? RightTurnCondition : LeftTurnCondition;
-    uint32_t timer_5 = millis();
-    while (turn_condition(minimum, current, goal)) {
-        if (millis() - timer_5 >= 4) {
-            Logger::Verbose(kDrivers, "main rotation -> start: %.2f, obj: %.2f, curr: %f, t: %d",
-                            start, goal, current, millis() - timer_5);
+    uint32_t current_time = millis();
+    uint32_t timer_5 = current_time;
+    uint32_t timer_100 = current_time;
+    while (turn_condition(minimum, current, goal))
+    {
+        current_time = millis();
+        if (current_time - timer_100 >= 100)
+        {
+            Logger::Verbose(kDrivers, "main rotation -> start: %.2f, obj: %.2f, curr: %f", start, goal, current);
+            timer_100 = millis();
+        }
+        if (current_time - timer_5 >= 4)
+        {
             timer_5 = millis();
             current = gyro->Yaw();
         }
@@ -33,22 +41,46 @@ void Driver::Rotate(const bool right) {
     uint16_t c = lasers->ReadF(), r = lasers->ReadFR(), l = lasers->ReadFL();
     SetSpeed(kRotateSlow * direction_multiplier, -kRotateSlow * direction_multiplier);
     int16_t diff = lasers->ComputeFrontDifference();
-    if (c < cell_dimensions::depth && Lasers::IsValidWall(l, c, r)) {
-        timer_5 = millis();
-        while (right ? diff < 1 : diff > -1) {
-            if (millis() - timer_5 >= 25) {
+
+    current_time = millis();
+    timer_5 = current_time;
+    timer_100 = current_time;
+
+    if (c < cell_dimensions::depth && Lasers::IsValidWall(l, c, r))
+    {
+        while (right ? diff < 1 : diff > -1)
+        {
+            current_time = millis();
+            if (current_time - timer_100 >= 100)
+            {
                 Logger::Verbose(kDrivers, "final rotation (lasers) -> diff: %d", diff);
+                timer_100 = millis();
+            }
+            if (current_time - timer_5 >= 25)
+            {
                 timer_5 = millis();
                 diff = lasers->ComputeFrontDifference();
             }
         }
-    } else {
+    }
+    else
+    {
+#if _EXECUTION_ENVIRONMENT == 0
+        goal = math::ClampAngle(start - (right ? 90 : -88));
+#else
         goal = math::ClampAngle(start - (right ? 100 : -95));
-        timer_5 = millis();
-        while (turn_condition(start, current, goal)) {
-            if (millis() - timer_5 >= 4) {
+#endif
+        while (turn_condition(start, current, goal))
+        {
+            current_time = millis();
+            if (current_time - timer_100 >= 100)
+            {
                 Logger::Verbose(kDrivers, "final rotation -> start: %.2f, obj: %.2f, curr: %f", start, goal,
                                 current);
+                timer_100 = millis();
+            }
+            if (current_time - timer_5 >= 4)
+            {
                 timer_5 = millis();
                 current = gyro->Yaw();
             }
@@ -61,13 +93,14 @@ void Driver::Rotate(const bool right) {
 }
 
 bool Driver::Go() {
-    Lasers *lasers = Lasers::Instance();
-    Gyro *gyro = Gyro::Instance();
-    Floor *floor = Floor::Instance();
+    Lasers* lasers = Lasers::Instance();
+    Gyro* gyro = Gyro::Instance();
+    Floor* floor = Floor::Instance();
     lasers->StartContinuous();
 
     uint16_t front_distance = lasers->ReadF(), back_distance = lasers->ReadB();
-    while (!math::InRange<uint16_t>(front_distance, 1, 8000) || !math::InRange<uint16_t>(back_distance, 1, 8000)) {
+    while (!math::InRange<uint16_t>(front_distance, 1, 8000) || !math::InRange<uint16_t>(back_distance, 1, 8000))
+    {
         front_distance = lasers->ReadF(), back_distance = lasers->ReadB();
         delay(100);
     }
@@ -88,8 +121,8 @@ bool Driver::Go() {
                  start_cell);
 
     int16_t delta_yaw = 0, speed = kMedium;
-    bool rear = false, is_valid_wall = true, near;
-    int16_t front_difference, lateral_difference;
+    bool rear = false, is_valid_wall = true, near = false;
+    int16_t front_difference = 0, lateral_difference = 0;
     uint8_t distance_component;
 
     uint32_t current_time = millis();
@@ -98,17 +131,20 @@ bool Driver::Go() {
     uint32_t timer_50 = current_time;
     uint32_t timer_100 = current_time;
 
-    while (GoCondition(C_NEGATE(use_front, rear), current_distance, rear ? start_cell : objective)) {
+    while (GoCondition(C_NEGATE(use_front, rear), current_distance, rear ? start_cell : objective))
+    {
         current_time = millis();
 
-        if (current_time >= timer_100 + 100) {
+        if (current_time >= timer_100 + 100)
+        {
             Logger::Verbose(kDrivers,
                             "go forward -> delta: %d, distance: %d, obj: %d, rotation: %.2f, validWall: %d, near: %d, fDifference: %d, lDifference: %d",
                             delta_yaw, current_distance, objective, current_rotation, is_valid_wall, near,
                             front_difference, lateral_difference);
             timer_100 = millis();
         }
-        if (current_time >= timer_50 + 50) {
+        if (current_time >= timer_50 + 50)
+        {
             near = C_NEGATE(use_front, rear) ? current_distance < objective + 20 : current_distance > objective - 20;
             distance_component = std::max(1, current_distance / cell_dimensions::depth);
 
@@ -122,39 +158,47 @@ bool Driver::Go() {
 
             delta_yaw = -delta_angle;
 
-            if (!near && abs(delta_angle) <= 20) {
+            if (!near && abs(delta_angle) <= 20)
+            {
                 speed = kFast;
                 delta_yaw *= 2;
                 delta_yaw += math::Clamp<int16_t>(lateral_difference * lateral_compensation_multiplier,
                                                   -max_lateral_compensation_speed, max_lateral_compensation_speed);
-            } else {
+            }
+            else
+            {
                 speed = near ? kMedium : kSlow;
                 delta_yaw *= 6;
             }
 
-            if (!is_valid_wall) {
+            if (!is_valid_wall)
+            {
                 delta_yaw *= 5;
-            } else {
-                if (near && cells <= 1) {
+            }
+            else
+            {
+                if (near && cells <= 1)
+                {
                     front_difference = Lasers::FrontDifference(l, r);
                     delta_yaw += front_difference * 2;
                     delta_yaw /= distance_component;
                 }
             }
-            if (!rear) {
-                auto f = floor->Read();
-                Serial2.printf("floor -> %d %d\n", f, f == Floor::kBlack);
-                if (f == Floor::kBlack) rear = true;
+            if (!rear)
+            {
+                if (floor->Read() == Floor::kBlack) rear = true;
             }
             timer_50 = millis();
         }
-        if (current_time >= timer_25 + 25) {
+        if (current_time >= timer_25 + 25)
+        {
             auto s = rear ? -speed : speed;
             SetSpeed(s - delta_yaw, s + delta_yaw);
             current_distance = use_front ? lasers->ReadF() : lasers->ReadB();
             if (math::InRange<uint16_t>(current_distance, 1, 8000)) timer_25 = millis();
         }
-        if (current_time >= timer_5 + 4) {
+        if (current_time >= timer_5 + 4)
+        {
             gyro->Update();
             timer_5 = millis();
         }
@@ -167,18 +211,25 @@ bool Driver::Go() {
     bool align_right = delta_angle > 0;
 
     SetSpeed(kRotateSlow * (align_right ? 1 : -1), kRotateSlow * (align_right ? -1 : 1));
-    auto condition = align_right ?
-                     [](float c, float s) { return math::AngleDifference(c, s) > 0; } :
-                     [](float c, float s) { return math::AngleDifference(c, s) < 0; };
+    auto condition = align_right
+                         ? static_cast<bool(*)(float, float)>([](float c, float s) {
+                             return math::AngleDifference(c, s) > 0;
+                         })
+                         : static_cast<bool(*)(float, float)>([](float c, float s) {
+                             return math::AngleDifference(c, s) < 0;
+                         });
     timer_5 = current_time;
     timer_50 = current_time;
-    while (condition(current_rotation, start_rotation)) {
+    while (condition(current_rotation, start_rotation))
+    {
         current_time = millis();
-        if (current_time >= timer_50 + 50) {
+        if (current_time >= timer_50 + 50)
+        {
             Logger::Verbose(kDrivers, "Adjusting -> starting: %f, current: %f", start_rotation, current_rotation);
             timer_50 = millis();
         }
-        if (current_time >= timer_5 + 4) {
+        if (current_time >= timer_5 + 4)
+        {
             current_rotation = gyro->Yaw();
             timer_5 = millis();
         }
@@ -192,7 +243,7 @@ bool Driver::Go() {
 
 bool Driver::AdjustFront(bool right) {
     delay(100);
-    Lasers *lasers = Lasers::Instance();
+    Lasers* lasers = Lasers::Instance();
 
     const int8_t direction_multiplier = right ? 1 : -1;
     uint16_t c = lasers->ReadF(), r = lasers->ReadFR(), l = lasers->ReadFL();
@@ -204,7 +255,8 @@ bool Driver::AdjustFront(bool right) {
 
     SetSpeed(-kRotateSlow * direction_multiplier, kRotateSlow * direction_multiplier);
     Logger::Verbose(kDrivers, "aligning %s", right ? "left" : "right");
-    while (first_condition(l, c, r)) {
+    while (first_condition(l, c, r))
+    {
         delay(50); // Align with the front wall
         r = lasers->ReadFR(), c = lasers->ReadF(), l = lasers->ReadFL();
         Logger::Verbose(kDrivers, "adjust -> l: %d, c: %d, r: %d");
@@ -212,7 +264,8 @@ bool Driver::AdjustFront(bool right) {
 
     SetSpeed(kRotateFast * direction_multiplier, -kRotateFast * direction_multiplier);
     Logger::Verbose(kDrivers, "aligning %s", right ? "right" : "left");
-    while (second_condition(l, c, r)) {
+    while (second_condition(l, c, r))
+    {
         delay(50); // Align with the front wall
         r = lasers->ReadFR(), c = lasers->ReadF(), l = lasers->ReadFL();
     }
@@ -224,7 +277,8 @@ bool Driver::AdjustFront(bool right) {
 }
 
 bool Driver::RightTurnCondition(const float start, const float current, const float goal) {
-    if (goal < start) {
+    if (goal < start)
+    {
         return goal <= current && current <= start;
     }
     return (0 <= current && current <= start) || (goal <= current && current <= 360);
@@ -235,7 +289,8 @@ bool Driver::RightAdjustCondition(uint16_t l, uint16_t c, uint16_t r) {
 }
 
 bool Driver::LeftTurnCondition(const float start, const float current, const float goal) {
-    if (goal >= start) {
+    if (goal >= start)
+    {
         return start <= current && current <= goal;
     }
     return (start <= current && current <= 360) || (0 <= current && current <= goal);
@@ -253,8 +308,7 @@ bool Driver::GoCondition(const bool use_front, const uint16_t current, const uin
 
 
 #if _EXECUTION_ENVIRONMENT == 0
-void Driver::SetSpeed(int l, int r)
-{
+void Driver::SetSpeed(int l, int r) {
     GetBus()->SetSpeed(l, r);
 }
 #else

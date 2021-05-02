@@ -35,7 +35,7 @@ bool Compass::GoTo(const Direction objective, const bool ignore_current, const b
 Walls* Compass::GetWalls() const
 {
     auto lasers = Lasers::Instance();
-    const uint8_t threshold = cell_dimensions::depth;
+    const uint16_t threshold = cell_dimensions::depth;
     uint16_t tmp_walls[] = {
                  lasers->ReadF(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
              }, walls[4];
