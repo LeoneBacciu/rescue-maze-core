@@ -6,15 +6,15 @@
 
 namespace dimensions
 {
-	const uint8_t width = 15;
-	const uint8_t height = 12;
-	const uint8_t depth = 20;
-	const uint8_t front_lasers_distance = 10;
+	const uint8_t width = 130;
+	const uint8_t height = 120;
+	const uint8_t depth = 200;
+	const uint8_t front_lasers_distance = 90;
 }
 
 namespace cell_dimensions
 {
-	const uint8_t depth = 30;
+	const uint16_t depth = 300;
 }
 
 namespace communication

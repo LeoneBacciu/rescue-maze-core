@@ -7,7 +7,7 @@
 #else
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
-#define FLOOR_PIN A2
+#define FLOOR_PIN PA7
 #endif
 
 class Floor : public Singleton<Floor>, BusConnection
@@ -15,4 +15,5 @@ class Floor : public Singleton<Floor>, BusConnection
 public:
 	enum FloorType { kBlack, kCheckpoint, kWhite };
 	FloorType Read() const;
+    uint32_t ReadRaw() const;
 };

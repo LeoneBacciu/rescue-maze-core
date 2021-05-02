@@ -67,7 +67,7 @@ void Logger::Print(const char *verb, Source source, const char *format, va_list 
 void Logger::Print(const char *verb, Source source, const char *format, va_list args) {
     char buffer[128];
     vsprintf(buffer, format, args);
-    Serial3.printf("[%s] - [%s] - {%s}", verb, source, buffer);
+    Serial2.printf("[%s] - [%s] - {%s}\n", verb, source_to_string_[source], buffer);
 }
 
 #endif

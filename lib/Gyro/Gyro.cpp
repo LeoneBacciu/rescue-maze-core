@@ -44,13 +44,16 @@ float Gyro::CalculateError()
     return 0.0;
 }
 #else
+
 void Gyro::Begin(unsigned long refresh) {
-    imu = new MPU6050(*GetBus());
+    wire.begin((uint8_t) PB11, (uint8_t) PB10);
+    wire.setClock(400000);
+    imu = new MPU6050(wire);
     imu->begin();
-    Calibrate();
-    microsPerReading = 1000000 / refresh;
     filter.begin(refresh);
+    microsPerReading = 1000000 / refresh;
     microsPrevious = micros();
+    Calibrate();
 }
 
 float Gyro::Yaw() {
@@ -69,7 +72,7 @@ float Gyro::Pitch() {
 }
 
 void Gyro::Calibrate() {
-    imu->calcGyroOffsets(false, 0);
+    imu->calcGyroOffsets(false, 100, 100);
 }
 
 void Gyro::Update() {
@@ -77,7 +80,8 @@ void Gyro::Update() {
     microsNow = micros();
     if (microsNow - microsPrevious >= microsPerReading) {
         imu->update();
-        filter.updateIMU(imu->getGyroY(), imu->getGyroY(), imu->getGyroZ(), imu->getAccX(), imu->getAccY(), imu->getAccZ());
+        filter.updateIMU(imu->getGyroX(), imu->getGyroY(), imu->getGyroZ(), imu->getAccX(), imu->getAccY(),
+                         imu->getAccZ());
         microsPrevious += microsPerReading;
     }
 }

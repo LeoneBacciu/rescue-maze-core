@@ -22,14 +22,14 @@ public:
 	float ComputeFrontAngle();
     uint16_t ReadF();
 	int16_t ComputeFrontDifference();
-	int16_t ComputeLateralDifference();
+	int16_t ComputeLateralDifference(const uint16_t threshold=600);
 	uint16_t ReadFL();
 	uint16_t ReadFR();
 	uint16_t ReadL();
 	uint16_t ReadR();
 	uint16_t ReadB();
 
-	static bool IsValidWall(uint16_t l, uint16_t c, uint16_t r, int tolerance=5);
+	static bool IsValidWall(uint16_t l, uint16_t c, uint16_t r, int tolerance=6);
 	static int16_t FrontDifference(uint16_t l, uint16_t r);
 
 private:
@@ -43,6 +43,8 @@ private:
     VL53L0X laserFR;
     VL53L0X laserF;
     VL53L0X laserFL;
+    VL53L0X laserL;
+    VL53L0X laserB;
     void changeAddress(uint8_t laser);
 #endif
 };
