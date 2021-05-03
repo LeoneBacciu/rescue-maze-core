@@ -66,7 +66,7 @@ void Driver::Rotate(const bool right) {
     else
     {
 #if _EXECUTION_ENVIRONMENT == 0
-        goal = math::ClampAngle(start - (right ? 90 : -88));
+        goal = math::ClampAngle(start - 90 * direction_multiplier);
 #else
         goal = math::ClampAngle(start - (right ? 100 : -95));
 #endif

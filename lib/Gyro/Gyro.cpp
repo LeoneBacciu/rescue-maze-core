@@ -1,44 +1,35 @@
 ﻿#include "Gyro.hpp"
 
 #if _EXECUTION_ENVIRONMENT == 0
-void Gyro::Begin(unsigned long refresh)
-{
+void Gyro::Begin(unsigned long refresh) {
     const auto now = high_resolution_clock::now();
     last_reset_time_ = duration_cast<milliseconds>(now.time_since_epoch()).count();
 }
 
-float Gyro::Yaw()
-{
+float Gyro::Yaw() {
     return FRotator::ClampAxis(360 - GetBus()->GetActor()->GetActorRotation().Yaw + CalculateError());
 }
 
-float Gyro::Roll()
-{
+float Gyro::Roll() {
     return FRotator::ClampAxis(360 - GetBus()->GetActor()->GetActorRotation().Roll + CalculateError());
 }
 
-float Gyro::Pitch()
-{
+float Gyro::Pitch() {
     return FRotator::ClampAxis(360 - GetBus()->GetActor()->GetActorRotation().Pitch + CalculateError());
 }
 
-void Gyro::Calibrate()
-{
-    const auto now = high_resolution_clock::now();
-    last_reset_time_ = duration_cast<milliseconds>(now.time_since_epoch()).count();
+void Gyro::Calibrate() {
+    last_reset_time_ = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-void Gyro::Update()
-{
+void Gyro::Update() {
 }
 
-float Gyro::CalculateError()
-{
+float Gyro::CalculateError() {
     if (error_)
     {
-        const auto now = high_resolution_clock::now();
-        const auto millis = duration_cast<milliseconds>(now.time_since_epoch()).count();
-        const auto current_error = drift_ * (millis - last_reset_time_) / 60000 - FMath::RandRange(0, 1);
+        const auto millis = std::chrono::duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        const auto current_error = drift_ * (millis - last_reset_time_) / 600000;
         return current_error;
     }
     return 0.0;
