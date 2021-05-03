@@ -13,6 +13,7 @@
 
 #include "Arduino.h"
 #include <BusConnection.hpp>
+#include <Logger.hpp>
 #include <utils/Singleton.hxx>
 #include <utils/GeometricPair.hxx>
 

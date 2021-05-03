@@ -9,9 +9,13 @@
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #else
 
+#define MPU6050_ADDR         0x68
+#define MPU6050_SMPLRT_DIV   0x19
+#define MPU6050_CONFIG       0x1a
+#define MPU6050_PWR_MGMT_1   0x6b
+
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
-#include <MPU6050_tockn.h>
 #include <Madgwick/MadgwickAHRS.h>
 
 #endif
@@ -30,7 +34,7 @@ public:
 
     void Calibrate();
 
-    void Update();
+    void Update(bool filter=true);
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
@@ -40,7 +44,26 @@ private:
     long long last_reset_time_ = 0;
 #else
     TwoWire wire;
-    MPU6050* imu;
+
+    int16_t rawAccX, rawAccY, rawAccZ, rawTemp,
+            rawGyroX, rawGyroY, rawGyroZ;
+
+    float gyroXoffset, gyroYoffset, gyroZoffset, accXoffset, accYoffset;
+
+    float temp, accX, accY, accZ, gyroX, gyroY, gyroZ;
+
+    float angleGyroX, angleGyroY, angleGyroZ,
+            angleAccX, angleAccY, angleAccZ;
+
+    float angleX, angleY, angleZ;
+
+    float interval;
+    uint32_t preInterval;
+
+    float accCoef, gyroCoef;
+
+    void writeReg(byte reg, byte data);
+
     Madgwick filter;
     unsigned long microsPerReading;
     unsigned long microsPrevious;

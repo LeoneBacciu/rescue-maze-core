@@ -1,5 +1,6 @@
 #pragma once
 #if _EXECUTION_ENVIRONMENT == 0
+#include "MainMaze/robot/lib/Serial/SerialPort.hpp"
 #include "MainMaze/robot/lib/Serial/Communication/Directions.hxx"
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "MainMaze/robot/lib/Driver/Driver.hpp"
@@ -16,6 +17,7 @@
 #include <Temp.hpp>
 #include <Brick.hpp>
 #include <Logger.hpp>
+#include <SerialPort.hpp>
 
 #endif
 

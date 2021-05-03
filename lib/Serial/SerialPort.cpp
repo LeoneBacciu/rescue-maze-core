@@ -41,7 +41,7 @@ uint8_t SerialPort::ReadHalfWayDrop() const
 
 void SerialPort::WriteHalfWayPoint(const bool ignore) const
 {
-    uint8_t buffer[] = {0xfd, ignore ? 0 : 1, 0xff};
+    uint8_t buffer[] = {0xfd, static_cast<uint8_t>(ignore ? 0 : 1), 0xff};
     char representation[8];
     ToCharArray(buffer, representation, 3);
     Logger::Info(kSerial, "writing halfway: %s", representation);

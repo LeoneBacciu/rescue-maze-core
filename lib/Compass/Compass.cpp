@@ -1,6 +1,5 @@
 #include "Compass.hpp"
 
-#include "MainMaze/robot/lib/Serial/SerialPort.hpp"
 
 bool Compass::GoTo(const Direction objective, const bool ignore_current, const bool ignore_next)
 {

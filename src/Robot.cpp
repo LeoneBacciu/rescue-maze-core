@@ -21,10 +21,10 @@ void Robot::Setup()
 	brick_ = Brick::Instance();
 
 	Logger::AllowAllSources();
-	
+
 	lasers_->Begin();
     brick_->Begin();
-	gyro_->Begin(25);
+	gyro_->Begin(200);
 	gyro_->Calibrate();
 	temp_->Calibrate();
 
@@ -52,9 +52,9 @@ bool Robot::Main()
 		serial_->Close();
 		return false;
 	}
-	
+
 	if (input_envelope->drop != 0) compass_->Drop(input_envelope->drop);
-	
+
 	success_ = compass_->GoTo(input_envelope->direction, last_envelope_->ignore, input_envelope->ignore);
 	last_envelope_ = input_envelope;
 	return true;

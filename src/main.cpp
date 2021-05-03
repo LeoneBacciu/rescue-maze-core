@@ -11,6 +11,9 @@
 
 void setup() {
     Serial2.begin(115200);
+    Serial1.setTx(PB6);
+    Serial1.setRx(PB7);
+    Serial1.begin(115200);
     Serial2.println("STARTING");
     delay(125);
 
@@ -67,10 +70,11 @@ void setup() {
 
     Serial2.println("SETUP");
     Robot::Setup();
+//    while (1);
 }
 
 void loop() {
-//    if (!Robot::Main()) return;
+    if (!Robot::Main()) return;
 }
 
 
@@ -91,7 +95,9 @@ void setup() {
 }
 
 void loop() {
-    Serial2.println("ciao");
+    uint16_t (*flash_size) = (uint16_t*)(0x1ffff7e0);
+    Serial2.print("ciao ");
+    Serial2.println(*flash_size);
     delay(100);
 }
 
