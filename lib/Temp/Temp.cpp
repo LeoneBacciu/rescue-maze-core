@@ -1,34 +1,31 @@
 ﻿#include "Temp.hpp"
 
 
-#if _EXECUTION_ENVIRONMENT == 0
-void Temp::Calibrate()
-{
-    const GeometricPair<float> values = Read();
-    threshold = (values.left + values.right) / 2;
-    Logger::Info(kTemp, "calibrated threshold: %d", threshold);
-}
-
-GeometricPair<float> Temp::Read()
-{
-    return {
-        ReadSide(GetBus()->GetActor()->GetActorRightVector() * -1),
-        ReadSide(GetBus()->GetActor()->GetActorRightVector())
-    };
-}
-
-GeometricPair<bool> Temp::IsHot()
-{
+GeometricPair<bool> Temp::IsHot() {
     const auto measures = Read();
-    Logger::Info(kTemp, "temp: %d, %d", measures.left, measures.right);
+    Logger::Info(kTemp, "temp: %.3f, %.3f", measures.left, measures.right);
     return {
         measures.left > threshold,
         measures.right > threshold
     };
 }
 
-float Temp::ReadSide(FVector direction) const
-{
+#if _EXECUTION_ENVIRONMENT == 0
+void Temp::Calibrate() {
+    const GeometricPair<float> values = Read();
+    threshold = (values.left + values.right) / 2;
+    Logger::Info(kTemp, "calibrated threshold: %d", threshold);
+}
+
+GeometricPair<float> Temp::Read() {
+    return {
+        ReadSide(GetBus()->GetActor()->GetActorRightVector() * -1),
+        ReadSide(GetBus()->GetActor()->GetActorRightVector())
+    };
+}
+
+
+float Temp::ReadSide(FVector direction) const {
     FHitResult out_hit;
 
     FVector start = GetBus()->GetActor()->GetActorLocation();
@@ -56,10 +53,6 @@ void Temp::Calibrate() {
 
 GeometricPair<float> Temp::Read() {
     return {readTemp(ADDR_L), readTemp(ADDR_R)};
-}
-
-GeometricPair<bool> Temp::IsHot() {
-    return {readTemp(ADDR_L) > threshold, readTemp(ADDR_R) > threshold};
 }
 
 float Temp::readTemp(uint8_t addr) {
