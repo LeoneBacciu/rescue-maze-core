@@ -48,7 +48,7 @@ float Temp::ReadSide(FVector direction) const {
 
 void Temp::Calibrate() {
     auto data = Read();
-    threshold = (data.left + data.right) / 2;
+    threshold = (data.left + data.right) / 2 + 3;
 }
 
 GeometricPair<float> Temp::Read() {
@@ -58,12 +58,12 @@ GeometricPair<float> Temp::Read() {
 float Temp::readTemp(uint8_t addr) {
     uint16_t ret;
     GetBus()->beginTransmission(addr); // start transmission to device
-    GetBus()->write(7);                 // sends register address to ReadF from
+    GetBus()->write(0x07);                 // sends register address to ReadF from
     GetBus()->endTransmission(false);   // end transmission
     GetBus()->requestFrom(addr, (uint8_t) 3); // send data n-bytes ReadF
     ret = GetBus()->read() | GetBus()->read() << 8;
     __unused uint8_t pec = GetBus()->read();
-    return ((float) ret - 546.3f) * .2f;
+    return ((float) ret * .02f) - 273.15;
 }
 
 #endif

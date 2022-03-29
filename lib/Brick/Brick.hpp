@@ -14,7 +14,7 @@
 #include <Servo.h>
 #include <Logger.hpp>
 
-#define SERVO_PIN 12
+#define SERVO_PIN PA15
 #endif
 
 class Brick : public Singleton<Brick>, BusConnection {

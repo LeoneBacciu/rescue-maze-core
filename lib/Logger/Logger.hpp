@@ -21,7 +21,8 @@ enum Source : uint8_t
 	kGyro,
 	kLasers,
 	kSerial,
-	kTemp
+	kTemp,
+    kGeneric,
 };
 
 enum Verbosity : uint8_t
@@ -35,6 +36,8 @@ enum Verbosity : uint8_t
 class Logger
 {
 public:
+
+    static void SetBus(HardwareSerial* hardwareSerial);
 
 	static void SetVerbosity(Verbosity verbosity);
 
@@ -55,6 +58,7 @@ public:
 	static void Error(Source source, const char* format, ...);
 
 private:
+    static HardwareSerial* serial;
 	static char const* source_to_string_[];
 	static bool allow_list_[];
 	static Verbosity verbosity_;

@@ -24,13 +24,13 @@
 
 class Robot
 {
-	static SerialPort* serial_;
-	static Compass* compass_;
+//	static SerialPort* serial_;
+//	static Compass* compass_;
 	static Lasers* lasers_;
 	static Gyro* gyro_;
-	static Temp* temp_;
-	static Floor* floor_;
-	static Brick* brick_;
+//	static Temp* temp_;
+//	static Floor* floor_;
+//	static Brick* brick_;
 	static bool success_;
 	static InputEnvelope* last_envelope_;
 public:

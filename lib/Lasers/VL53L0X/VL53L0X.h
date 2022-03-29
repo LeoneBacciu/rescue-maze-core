@@ -105,7 +105,7 @@ class VL53L0X
     void setAddress(uint8_t new_addr);
     inline uint8_t getAddress() { return address; }
 
-    bool init(bool io_2v8 = true);
+    bool init(TwoWire *wire, bool io_2v8 = true);
 
     void writeReg(uint8_t reg, uint8_t value);
     void writeReg16Bit(uint8_t reg, uint16_t value);
@@ -134,6 +134,12 @@ class VL53L0X
     inline void setTimeout(uint16_t timeout) { io_timeout = timeout; }
     inline uint16_t getTimeout() { return io_timeout; }
     bool timeoutOccurred();
+
+    void setHighPrecision();
+
+    void setDefault();
+
+    void setLongRange();
 
   private:
     // TCC: Target CentreCheck
@@ -173,5 +179,6 @@ class VL53L0X
     static uint16_t encodeTimeout(uint32_t timeout_mclks);
     static uint32_t timeoutMclksToMicroseconds(uint16_t timeout_period_mclks, uint8_t vcsel_period_pclks);
     static uint32_t timeoutMicrosecondsToMclks(uint32_t timeout_period_us, uint8_t vcsel_period_pclks);
+
 };
 #endif

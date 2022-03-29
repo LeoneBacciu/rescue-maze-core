@@ -1,10 +1,14 @@
 #include "Floor.hpp"
 
-Floor::FloorType Floor::Read() const
-{
+Floor::FloorType Floor::Read() {
     const uint32_t color = ReadRaw();
-    if (color > 800) return kBlack;
-    if (color < 19) return kCheckpoint;
+    Logger::Verbose(kFloor, "reading floor -> %d, (%d)", color, blackCounter);
+    if (color < 25) return kCheckpoint;
+    if (color > 400) {
+        if (++blackCounter > 5) return kBlack;
+        else return kWhite;
+    }
+    blackCounter = 0;
     return kWhite;
 }
 

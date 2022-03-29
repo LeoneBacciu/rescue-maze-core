@@ -72,10 +72,10 @@ void SerialPort::Connect(const char* port_name, const int baud_rate)
                                  nullptr);
     if (this->handler_ == INVALID_HANDLE_VALUE)
     {
-        Logger::Error(kSerial, "error opening serial port %s", port_name);
+        Logger::Error(kSerial, "error opening serial2 port %s", port_name);
         return;
     }
-    Logger::Info(kSerial, "serial port %s open", port_name);
+    Logger::Info(kSerial, "serial2 port %s open", port_name);
 
     DCB dcb_serial_params = {0};
     dcb_serial_params.DCBlength = sizeof(dcb_serial_params);
@@ -127,21 +127,24 @@ SerialPort::~SerialPort()
 #else
 
 void SerialPort::Connect(const char *port_name, int baud_rate) {
-    Serial.begin(baud_rate);
+    Serial1.setTx(PB6);
+    Serial1.setRx(PB7);
+    Serial1.begin(baud_rate);
 }
 
 uint8_t SerialPort::ReadOneByte() const {
     uint8_t buffer[1];
-    Serial.readBytes(buffer, 1);
+    while(Serial1.available() < 1);
+    Serial1.readBytes(buffer, 1);
     return buffer[0];
 }
 
 bool SerialPort::Write(uint8_t *buffer, unsigned int size) const {
-    return Serial.write(buffer, size);
+    return Serial1.write(buffer, size);
 }
 
 void SerialPort::Close() const {
-    Serial.end();
+    Serial1.end();
 }
 
 SerialPort::~SerialPort() {

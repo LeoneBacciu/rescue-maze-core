@@ -2,22 +2,24 @@
 
 #include <Wire.h>
 #include "Arduino.h"
+#include "BusConnection.hpp"
 
 #define lol
 #ifdef lol
 
 #include "Robot.hpp"
 
+TwoWire wire(PB9, PB8);
+HardwareSerial serial(PB7, PB6);
 
 void setup() {
-    Serial2.begin(115200);
-    Serial1.setTx(PB6);
-    Serial1.setRx(PB7);
-    Serial1.begin(115200);
-    Serial2.println("STARTING");
+
+    digitalWrite(PA15, LOW);
+
+    serial.begin(115200);
+    serial.println("STARTING");
     delay(125);
 
-    while (!Serial2.available());
 
     pinMode(PA10, OUTPUT);
     pinMode(PB12, OUTPUT);
@@ -25,80 +27,130 @@ void setup() {
     pinMode(PA9, OUTPUT);
     pinMode(PB14, OUTPUT);
     pinMode(PB15, OUTPUT);
+    pinMode(PA8, OUTPUT);
 
-    Wire.begin((uint8_t) PB9, (uint8_t) PB8);
 
-    BusConnection::SetBus(&Wire);
+    wire.begin();
+    wire.setClock(400000);
+
+
+    BusConnection::SetBus(&wire);
+    Logger::SetBus(&serial);
+
+
 
     for (int i = 0; i < 8; ++i) {
-        Wire.beginTransmission(0x70);  // TCA9548A address is 0x70
-        Wire.write(1 << i);          // send byte to select bus
-        Wire.endTransmission();
+        wire.beginTransmission(0x70);  // TCA9548A address is 0x70
+        wire.write(1 << i);          // send byte to select bus
+        wire.endTransmission();
         int nDevices = 0;
 
-        Serial2.print("Scanning bus ");
-        Serial2.print(i);
-        Serial2.println("...");
+        serial.print("Scanning bus ");
+        serial.print(i);
+        serial.println("...");
 
         for (byte address = 1; address < 127; ++address) {
-            Wire.beginTransmission(address);
-            byte error = Wire.endTransmission();
+            wire.beginTransmission(address);
+            byte error = wire.endTransmission();
 
             if (error == 0) {
-                Serial2.print("I2C device found at address 0x");
+                serial.print("I2C device found at address 0x");
                 if (address < 16) {
-                    Serial2.print("0");
+                    serial.print("0");
                 }
-                Serial2.print(address, HEX);
-                Serial2.println("  !");
+                serial.print(address, HEX);
+                serial.println("  !");
 
                 ++nDevices;
             } else if (error == 4) {
-                Serial2.print("Unknown error at address 0x");
+                serial.print("Unknown error at address 0x");
                 if (address < 16) {
-                    Serial2.print("0");
+                    serial.print("0");
                 }
-                Serial2.println(address, HEX);
+                serial.println(address, HEX);
             }
         }
         if (nDevices == 0) {
-            Serial2.println("No I2C devices found\n");
+            serial.println("No I2C devices found\n");
         } else {
-            Serial2.println("done\n");
+            serial.println("done\n");
         }
     }
 
-    Serial2.println("SETUP");
+    while (!serial.available());
+
+    serial.println("SETUP");
     Robot::Setup();
-//    while (1);
 }
 
 void loop() {
-    if (!Robot::Main()) return;
+//    if (!Robot::Main()) while (1);
 }
 
 
 #else
 
 
+int i = 0;
 
 void setup() {
 
-//    Wire.begin();
-//    Wire.setClock(400000);
-//    Wire.beginTransmission(0x70);  // TCA9548A address is 0x70
-//    Wire.write(1 << 6);          // send byte to select bus
-//    Wire.endTransmission();
 
-    Serial2.begin(115200);
+//    Wire.begin();
+    //Wire.beginTransmission(0x70);  // TCA9548A address is 0x70
+    //1Wire.write(1 << 4);          // send byte to select bus
+    //w/ire.endTransmission();
+
+    serial.begin(115200);
+    serial.println("\nI2C Scanner");
+    Wire.begin((uint8_t) PB9, (uint8_t) PB8);
+    Wire.setClock(400000);
 
 }
 
 void loop() {
-    uint16_t (*flash_size) = (uint16_t*)(0x1ffff7e0);
-    Serial2.print("ciao ");
-    Serial2.println(*flash_size);
-    delay(100);
+  Wire.beginTransmission(0x70);  // TCA9548A address is 0x70
+  Wire.write(1 << i);          // send byte to select bus
+  Wire.endTransmission();
+  int nDevices = 0;
+
+  serial.print("Scanning bus ");
+  serial.print(i);
+  serial.println("...");
+
+  for (byte address = 1; address < 127; ++address) {
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmisstion to see if
+    // a device did acknowledge to the address.
+    Wire.beginTransmission(address);
+    byte error = Wire.endTransmission();
+
+    if (error == 0) {
+      serial.print("I2C device found at address 0x");
+      if (address < 16) {
+        serial.print("0");
+      }
+      serial.print(address, HEX);
+      serial.println("  !");
+
+      ++nDevices;
+    } else if (error == 4) {
+      serial.print("Unknown error at address 0x");
+      if (address < 16) {
+        serial.print("0");
+      }
+      serial.println(address, HEX);
+    }
+  }
+  if (nDevices == 0) {
+    serial.println("No I2C devices found\n");
+  } else {
+    serial.println("done\n");
+  }
+
+  if (i<7) i++;
+  else i = 0;
+  delay(1000); // Wait 5 seconds for next scan
 }
 
 #endif

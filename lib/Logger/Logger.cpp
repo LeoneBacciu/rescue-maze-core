@@ -1,8 +1,9 @@
 #include "Logger.hpp"
 
-char const *Logger::source_to_string_[] = {"brick", "compass", "drivers", "floor", "gyro", "lasers", "serial", "temp"};
+char const *Logger::source_to_string_[] = {"brick", "compass", "drivers", "floor", "gyro", "lasers", "serial2", "temp", "generic"};
 bool Logger::allow_list_[] = {false, false, false, false, false, false, false, false};
 Verbosity Logger::verbosity_ = kInfo;
+HardwareSerial* Logger::serial;
 
 void Logger::SetVerbosity(Verbosity verbosity) {
     verbosity_ = verbosity;
@@ -17,11 +18,11 @@ void Logger::DenySource(const Source source) {
 }
 
 void Logger::AllowAllSources() {
-    for (bool &i : allow_list_) i = true;
+    for (bool &i: allow_list_) i = true;
 }
 
 void Logger::DenyAllSources() {
-    for (bool &i : allow_list_) i = false;
+    for (bool &i: allow_list_) i = false;
 }
 
 void Logger::Verbose(Source source, const char *format, ...) {
@@ -67,7 +68,11 @@ void Logger::Print(const char *verb, Source source, const char *format, va_list 
 void Logger::Print(const char *verb, Source source, const char *format, va_list args) {
     char buffer[128];
     vsprintf(buffer, format, args);
-    Serial2.printf("[%s] - [%s] - {%s}\n", verb, source_to_string_[source], buffer);
+    serial->printf("[%s] - [%s] - {%s}\n", verb, source_to_string_[source], buffer);
+}
+
+void Logger::SetBus(HardwareSerial *hardwareSerial) {
+    serial = hardwareSerial;
 }
 
 #endif

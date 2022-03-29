@@ -21,8 +21,8 @@
 #define INV_R2 PB12
 #define INV_R1 PB13
 #define PWM_L PA9
-#define INV_L1 PB14
-#define INV_L2 PB15
+#define INV_L2 PB14
+#define INV_L1 PB15
 
 #include <Gyro.hpp>
 #include <Floor.hpp>
@@ -40,9 +40,10 @@ class Driver : BusConnection {
     static const uint8_t lateral_compensation_threshold = 200;
     static const uint8_t lateral_compensation_multiplier = 2;
     static const uint8_t frontal_compensation_multiplier = 2;
+    static const int16_t frontLasersBias = -4;
 
     enum Speeds : uint8_t {
-        kBreak = 40, kSlow = 80, kRotateSlow = 100, kMedium = 125, kRotateFast = 150, kFast = 200
+        kBreak = 100, kSlow = 150, kRotateSlow = 120, kMedium = 175, kRotateFast = 125, kFast = 225
     };
 
 public:
@@ -51,6 +52,7 @@ public:
     static bool Go();
 
     static void SetSpeed(int l, int r);
+
 private:
 
     static bool AdjustFront(bool right = true);
@@ -64,5 +66,7 @@ private:
     static bool LeftAdjustCondition(uint16_t l, uint16_t c, uint16_t r);
 
     static bool GoCondition(bool use_front, uint16_t current, uint16_t objective);
+
+    static void CenterCell();
 
 };

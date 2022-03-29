@@ -1,30 +1,30 @@
 ﻿#pragma once
 
-#include <chrono>
-#include <ctime>
-
 
 #if _EXECUTION_ENVIRONMENT == 0
+#include <chrono>
+#include <ctime>
 #include "MainMaze/robot/lib/Bus/BusConnection.hpp"
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
+using namespace std::chrono;
 #else
 
-#define MPU6050_ADDR         0x68
-#define MPU6050_SMPLRT_DIV   0x19
-#define MPU6050_CONFIG       0x1a
-#define MPU6050_PWR_MGMT_1   0x6b
+#define RADIANS_TO_DEGREES 57.2958
 
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
 #include <Madgwick/MadgwickAHRS.h>
+#include <Logger.hpp>
+#include "MPU6050_6Axis_MotionApps20.h"
 
 #endif
 
-using namespace std::chrono;
 
 class Gyro : public Singleton<Gyro>, BusConnection {
 public:
-    void Begin(unsigned long refresh);
+    Gyro() : wire(PB11, PB10), mpu(MPU6050_DEFAULT_ADDRESS, &wire) {}
+
+    void Begin(unsigned long refresh, bool calibrate = true);
 
     float Yaw();
 
@@ -32,9 +32,9 @@ public:
 
     float Pitch();
 
-    void Calibrate();
+    void Calibrate(uint16_t samples = 2000);
 
-    void Update(bool filter=true);
+    void Update();
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
@@ -44,28 +44,12 @@ private:
     long long last_reset_time_ = 0;
 #else
     TwoWire wire;
+    MPU6050 mpu;
 
-    int16_t rawAccX, rawAccY, rawAccZ, rawTemp,
-            rawGyroX, rawGyroY, rawGyroZ;
+    uint8_t fifoBuffer[64]; // FIFO storage buffer
 
-    float gyroXoffset, gyroYoffset, gyroZoffset, accXoffset, accYoffset;
-
-    float temp, accX, accY, accZ, gyroX, gyroY, gyroZ;
-
-    float angleGyroX, angleGyroY, angleGyroZ,
-            angleAccX, angleAccY, angleAccZ;
-
-    float angleX, angleY, angleZ;
-
-    float interval;
-    uint32_t preInterval;
-
-    float accCoef, gyroCoef;
-
-    void writeReg(byte reg, byte data);
-
-    Madgwick filter;
-    unsigned long microsPerReading;
-    unsigned long microsPrevious;
+    Quaternion q;
+    VectorFloat gravity;
+    float ypr[3];
 #endif
 };

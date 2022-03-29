@@ -1,6 +1,7 @@
 ﻿#include "Lasers.hpp"
 
 #include <utility>
+#include <utils/Math.hxx>
 
 
 #if _EXECUTION_ENVIRONMENT == 0
@@ -33,9 +34,9 @@ int16_t Lasers::ComputeFrontDifference()
 
 int16_t Lasers::ComputeLateralDifference(const uint16_t threshold)
 {
-    const uint16_t l = ReadL(), r = ReadR();
-    if (l > threshold || r > threshold) return 0;
-    return l % cell_dimensions::depth - r % cell_dimensions::depth;
+    const uint16_t L = ReadL(), R = ReadR();
+    if (L > threshold || R > threshold) return 0;
+    return L % cell_dimensions::depth - R % cell_dimensions::depth;
 }
 
 uint16_t Lasers::ReadFL()
@@ -68,15 +69,15 @@ uint16_t Lasers::ReadB()
         - dimensions::depth / 2;
 }
 
-bool Lasers::IsValidWall(const uint16_t l, const uint16_t c, const uint16_t r, const int tolerance)
+bool Lasers::IsValidWall(const uint16_t L, const uint16_t c, const uint16_t R, const int tolerance)
 {
-    const uint16_t mean = std::min(r, l) + abs(r - l) / 2;
-    return abs(l - r) < dimensions::front_lasers_distance && mean - tolerance <= c && c <= mean + tolerance;
+    const uint16_t mean = std::min(R, L) + abs(R - L) / 2;
+    return abs(L - R) < dimensions::front_lasers_distance && mean - tolerance <= c && c <= mean + tolerance;
 }
 
-int16_t Lasers::FrontDifference(const uint16_t l, const uint16_t r)
+int16_t Lasers::FrontDifference(const uint16_t L, const uint16_t R)
 {
-    return r - l;
+    return R - L;
 }
 
 uint16_t Lasers::Read(FVector direction, float delta_y, bool draw) const
@@ -112,62 +113,69 @@ float Lasers::MakeError(const float value) const
 #else
 
 void Lasers::Begin() {
-    changeAddress(1);
-    laserR.init();
-    laserR.setTimeout(40);
-    laserR.setMeasurementTimingBudget(40000);
-    changeAddress(2);
-    laserFR.init();
-    laserFR.setTimeout(40);
-    laserFR.setMeasurementTimingBudget(40000);
-    changeAddress(3);
-    laserF.init();
-    laserF.setTimeout(40);
-    laserF.setMeasurementTimingBudget(40000);
-    changeAddress(7);
-    laserFL.init();
-    laserFL.setTimeout(40);
-    laserFL.setMeasurementTimingBudget(40000);
-    changeAddress(6);
-    laserL.init();
-    laserL.setTimeout(40);
-    laserL.setMeasurementTimingBudget(40000);
-    changeAddress(5);
-    laserB.init();
-    laserB.setTimeout(40);
-    laserB.setMeasurementTimingBudget(40000);
+    changeAddress(ADDRESSES::R);
+    laserR.init(GetBus());
+    laserR.setTimeout(60);
+    laserR.setHighPrecision();
+    Logger::Verbose(kLasers, "R ok");
+    changeAddress(ADDRESSES::FR);
+    laserFR.init(GetBus());
+    laserFR.setTimeout(60);
+    laserFR.setHighPrecision();
+    Logger::Verbose(kLasers, "FR ok");
+    changeAddress(ADDRESSES::F);
+    laserF.init(GetBus());
+    laserF.setTimeout(60);
+    laserF.setHighPrecision();
+    Logger::Verbose(kLasers, "F ok");
+    changeAddress(ADDRESSES::FL);
+    laserFL.init(GetBus());
+    laserFL.setTimeout(60);
+    laserFL.setHighPrecision();
+    Logger::Verbose(kLasers, "FL ok");
+    changeAddress(ADDRESSES::L);
+    laserL.init(GetBus());
+    laserL.setTimeout(60);
+    laserL.setHighPrecision();
+    Logger::Verbose(kLasers, "L ok");
+    changeAddress(ADDRESSES::B);
+    laserB.init(GetBus());
+    laserB.setTimeout(60);
+    laserB.setHighPrecision();
+    Logger::Verbose(kLasers, "B ok");
 }
 
 void Lasers::StartContinuous() {
     continuous = true;
-    changeAddress(1);
+    changeAddress(ADDRESSES::R);
     laserR.startContinuous();
-    changeAddress(2);
+    changeAddress(ADDRESSES::FR);
     laserFR.startContinuous();
-    changeAddress(3);
+    changeAddress(ADDRESSES::F);
     laserF.startContinuous();
-    changeAddress(7);
+    changeAddress(ADDRESSES::FL);
     laserFL.startContinuous();
-    changeAddress(6);
+    changeAddress(ADDRESSES::L);
     laserL.startContinuous();
-    changeAddress(5);
+    changeAddress(ADDRESSES::B);
     laserB.startContinuous();
 }
 
 void Lasers::StopContinuous() {
     continuous = false;
-    changeAddress(1);
+    changeAddress(ADDRESSES::R);
     laserR.stopContinuous();
-    changeAddress(2);
+    changeAddress(ADDRESSES::FR);
     laserFR.stopContinuous();
-    changeAddress(3);
+    changeAddress(ADDRESSES::F);
     laserF.stopContinuous();
-    changeAddress(7);
+    changeAddress(ADDRESSES::FL);
     laserFL.stopContinuous();
-    changeAddress(6);
+    changeAddress(ADDRESSES::L);
     laserL.stopContinuous();
-    changeAddress(5);
+    changeAddress(ADDRESSES::B);
     laserB.stopContinuous();
+
 
 }
 
@@ -176,61 +184,89 @@ float Lasers::ComputeFrontAngle() {
 }
 
 int16_t Lasers::ComputeFrontDifference() {
-    return ReadFR() - ReadFL();
+    return FrontDifference(ReadFL(), ReadFR());
 }
 
-int16_t Lasers::ComputeLateralDifference(const uint16_t threshold) {
-    const uint16_t l = ReadL(), r = ReadR();
+int16_t Lasers::ComputeLateralDifference(const uint16_t threshold, const int16_t bias) {
+    uint16_t l, r, trials = 5;
+    do {
+        l = ReadL();
+        r = ReadR();
+        trials--;
+        delay(1);
+    } while (trials > 0 && (!math::InRange<uint16_t>(l, 1, 8000) || !math::InRange<uint16_t>(r, 1, 8000)));
     if (l > threshold || r > threshold) return 0;
-    return l % cell_dimensions::depth - r % cell_dimensions::depth;
+    uint16_t cells = std::max<float>((float) l / cell_dimensions::depth + (float) r / cell_dimensions::depth, 1);
+    int16_t diff = l % cell_dimensions::depth - r % cell_dimensions::depth + bias;
+    return static_cast<float>(diff) / static_cast<float>(cells);
 }
 
 void Lasers::changeAddress(uint8_t laser) {
+    delay(1);
     if (laser > 7 || laser == current_bus) return;
     GetBus()->beginTransmission(0x70);
     GetBus()->write(1 << laser);
     GetBus()->endTransmission();
     current_bus = laser;
+    delay(1);
 }
 
 
 uint16_t Lasers::ReadR() {
-    changeAddress(1);
-    return continuous ? laserR.readRangeContinuousMillimeters() : laserR.readRangeSingleMillimeters();
+    return Read(laserR, ADDRESSES::R, &rHighPrecision);
 }
 
 uint16_t Lasers::ReadFR() {
-    changeAddress(2);
-    return continuous ? laserFR.readRangeContinuousMillimeters() : laserFR.readRangeSingleMillimeters();
+    return Read(laserFR, ADDRESSES::FR, &frHighPrecision);
 }
 
 uint16_t Lasers::ReadF() {
-    changeAddress(3);
-    return continuous ? laserF.readRangeContinuousMillimeters() : laserF.readRangeSingleMillimeters();
+    return Read(laserF, ADDRESSES::F, &fHighPrecision);
 }
 
 uint16_t Lasers::ReadFL() {
-    changeAddress(7);
-    return continuous ? laserFL.readRangeContinuousMillimeters() : laserFL.readRangeSingleMillimeters();
+    return Read(laserFL, ADDRESSES::FL, &flHighPrecision);
 }
 
 uint16_t Lasers::ReadL() {
-    changeAddress(6);
-    return continuous ? laserL.readRangeContinuousMillimeters() : laserL.readRangeSingleMillimeters();
+    return Read(laserL, ADDRESSES::L, &lHighPrecision);
 }
 
 uint16_t Lasers::ReadB() {
-    changeAddress(5);
-    return continuous ? laserB.readRangeContinuousMillimeters() : laserB.readRangeSingleMillimeters();
+    return Read(laserB, ADDRESSES::B, &bHighPrecision);
 }
 
-bool Lasers::IsValidWall(const uint16_t l, const uint16_t c, const uint16_t r, const int tolerance) {
+bool Lasers::IsValidWall(const uint16_t l, const uint16_t c, const uint16_t r, const uint16_t tolerance) {
     const uint16_t mean = std::min(r, l) + abs(r - l) / 2;
-    return abs(l - r) < dimensions::front_lasers_distance && mean - tolerance <= c && c <= mean + tolerance;
+    return abs(l - r) < dimensions::front_lasers_distance &&
+           math::InRange<int64_t>(c, mean - tolerance, mean + tolerance);
 }
 
-int16_t Lasers::FrontDifference(const uint16_t l, const uint16_t r) {
-    return r - l;
+int16_t Lasers::FrontDifference(const uint16_t l, const uint16_t r, const int16_t bias) {
+    return (r - l) + bias;
+}
+
+uint16_t Lasers::Read(VL53L0X laser, uint8_t address, bool *highPrecision) {
+    changeAddress(address);
+    uint16_t measure = continuous ? laser.readRangeContinuousMillimeters() : laser.readRangeSingleMillimeters();
+    if (measure < 600) {
+        if (!*highPrecision) {
+            Logger::Verbose(kLasers, "Setting %d to high precision", address);
+            laser.setHighPrecision();
+            *highPrecision = true;
+            if (continuous) laser.startContinuous();
+            measure = continuous ? laser.readRangeContinuousMillimeters() : laser.readRangeSingleMillimeters();
+        }
+    } else {
+        if (*highPrecision) {
+            Logger::Verbose(kLasers, "Setting %d to long range", address);
+            laser.setLongRange();
+            *highPrecision = false;
+            if (continuous) laser.startContinuous();
+            measure = continuous ? laser.readRangeContinuousMillimeters() : laser.readRangeSingleMillimeters();
+        }
+    }
+    return measure;
 }
 
 
