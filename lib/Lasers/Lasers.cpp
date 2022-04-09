@@ -213,27 +213,27 @@ void Lasers::changeAddress(uint8_t laser) {
 
 
 uint16_t Lasers::ReadR() {
-    return Read(laserR, ADDRESSES::R, &rHighPrecision);
+    return Read(laserR, ADDRESSES::R, &rHighPrecision) + BIASES::R;
 }
 
 uint16_t Lasers::ReadFR() {
-    return Read(laserFR, ADDRESSES::FR, &frHighPrecision);
+    return Read(laserFR, ADDRESSES::FR, &frHighPrecision) + BIASES::FR;
 }
 
 uint16_t Lasers::ReadF() {
-    return Read(laserF, ADDRESSES::F, &fHighPrecision);
+    return Read(laserF, ADDRESSES::F, &fHighPrecision) + BIASES::F;
 }
 
 uint16_t Lasers::ReadFL() {
-    return Read(laserFL, ADDRESSES::FL, &flHighPrecision);
+    return Read(laserFL, ADDRESSES::FL, &flHighPrecision) + BIASES::FL;
 }
 
 uint16_t Lasers::ReadL() {
-    return Read(laserL, ADDRESSES::L, &lHighPrecision);
+    return Read(laserL, ADDRESSES::L, &lHighPrecision) + BIASES::L;
 }
 
 uint16_t Lasers::ReadB() {
-    return Read(laserB, ADDRESSES::B, &bHighPrecision);
+    return Read(laserB, ADDRESSES::B, &bHighPrecision) + BIASES::B;
 }
 
 bool Lasers::IsValidWall(const uint16_t l, const uint16_t c, const uint16_t r, const uint16_t tolerance) {
@@ -249,6 +249,12 @@ int16_t Lasers::FrontDifference(const uint16_t l, const uint16_t r, const int16_
 uint16_t Lasers::Read(VL53L0X laser, uint8_t address, bool *highPrecision) {
     changeAddress(address);
     uint16_t measure = continuous ? laser.readRangeContinuousMillimeters() : laser.readRangeSingleMillimeters();
+    if (measure > 65535 || measure <= 0) {
+        Begin();
+        if (continuous) StartContinuous();
+        changeAddress(address);
+    }
+    return measure;
     if (measure < 600) {
         if (!*highPrecision) {
             Logger::Verbose(kLasers, "Setting %d to high precision", address);

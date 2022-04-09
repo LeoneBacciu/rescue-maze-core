@@ -17,12 +17,12 @@
 
 #include "Arduino.h"
 
-#define PWM_R PA10
-#define INV_R2 PB12
+#define PWM_R PA9
 #define INV_R1 PB13
-#define PWM_L PA9
-#define INV_L2 PB14
-#define INV_L1 PB15
+#define INV_R2 PB12
+#define PWM_L PA10
+#define INV_L1 PB14
+#define INV_L2 PB15
 
 #include <Gyro.hpp>
 #include <Floor.hpp>
@@ -36,14 +36,12 @@
 #define C_NEGATE(a, b) (!a&b || a&!b)
 
 class Driver : BusConnection {
-    static const uint8_t max_lateral_compensation_speed = 30;
-    static const uint8_t lateral_compensation_threshold = 200;
-    static const uint8_t lateral_compensation_multiplier = 2;
-    static const uint8_t frontal_compensation_multiplier = 2;
-    static const int16_t frontLasersBias = -4;
+    static const uint8_t max_lateral_compensation_speed = 40;
+    static const uint8_t lateral_compensation_multiplier = 5;
 
     enum Speeds : uint8_t {
-        kBreak = 100, kSlow = 150, kRotateSlow = 120, kMedium = 175, kRotateFast = 125, kFast = 225
+//        kBreak = 100, kSlow = 100, kRotateSlow = 120, kMedium = 100, kRotateFast = 200, kFast = 150
+        kBreak = 100, kSlow = 150, kRotateSlow = 120, kMedium = 175, kRotateFast = 200, kFast = 225
     };
 
 public:
@@ -69,4 +67,7 @@ private:
 
     static void CenterCell();
 
+    static void Break(int l, int r, int time = 100);
+
+    static void ReturnToAngle(float goal);
 };

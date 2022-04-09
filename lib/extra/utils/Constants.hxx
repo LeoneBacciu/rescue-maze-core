@@ -6,10 +6,17 @@
 
 namespace dimensions
 {
-	const uint8_t width = 130;
+	const uint8_t width = 110;
 	const uint8_t height = 120;
 	const uint8_t depth = 200;
-	const uint8_t front_lasers_distance = 90;
+	const uint8_t front_lasers_distance = 65;
+}
+
+namespace movements {
+    const uint8_t touch = 20;
+    const uint8_t arrived = 50;
+    const uint8_t really_near = 80;
+    const uint8_t near = 120;
 }
 
 namespace cell_dimensions

@@ -52,17 +52,17 @@ void Gyro::Begin(unsigned long refresh, bool calibrate) {
 
 float Gyro::Yaw() {
     Update();
-    return ypr[0] * RADIANS_TO_DEGREES;
+    return -ypr[0] * RADIANS_TO_DEGREES + 180;
 }
 
 float Gyro::Roll() {
     Update();
-    return ypr[2] * RADIANS_TO_DEGREES;
+    return -ypr[2] * RADIANS_TO_DEGREES + 180;
 }
 
 float Gyro::Pitch() {
     Update();
-    return ypr[1] * RADIANS_TO_DEGREES;
+    return -ypr[1] * RADIANS_TO_DEGREES + 180;
 }
 
 void Gyro::Calibrate(const uint16_t samples) {

@@ -1,9 +1,10 @@
 #include "Logger.hpp"
 
-char const *Logger::source_to_string_[] = {"brick", "compass", "drivers", "floor", "gyro", "lasers", "serial2", "temp", "generic"};
+char const *Logger::source_to_string_[] = {"brick", "compass", "drivers", "floor", "gyro", "lasers", "serial2", "temp",
+                                           "generic"};
 bool Logger::allow_list_[] = {false, false, false, false, false, false, false, false};
 Verbosity Logger::verbosity_ = kInfo;
-HardwareSerial* Logger::serial;
+HardwareSerial *Logger::serial;
 
 void Logger::SetVerbosity(Verbosity verbosity) {
     verbosity_ = verbosity;
@@ -66,7 +67,7 @@ void Logger::Print(const char *verb, Source source, const char *format, va_list 
 #else
 
 void Logger::Print(const char *verb, Source source, const char *format, va_list args) {
-    char buffer[128];
+    char buffer[256];
     vsprintf(buffer, format, args);
     serial->printf("[%s] - [%s] - {%s}\n", verb, source_to_string_[source], buffer);
 }

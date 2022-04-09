@@ -71,12 +71,23 @@ private:
     uint16_t Read(VL53L0X laser, uint8_t address, bool *highPrecision);
 
     struct ADDRESSES {
-        static const uint8_t R = 1;
-        static const uint8_t FR = 4;
+        static const uint8_t R = 5;
+        static const uint8_t FR = 7;
         static const uint8_t F = 6;
-        static const uint8_t FL = 7;
-        static const uint8_t L = 5;
-        static const uint8_t B = 1;
+        static const uint8_t FL = 4;
+        static const uint8_t L = 1;
+        static const uint8_t B = 0;
     };
+
+
+    struct BIASES {
+        static const int8_t R = -5;
+        static const int8_t FR = -5;
+        static const int8_t F = -16;
+        static const int8_t FL = -2;
+        static const int8_t L = -10;
+        static const int8_t B = -16;
+    };
+
 #endif
 };
