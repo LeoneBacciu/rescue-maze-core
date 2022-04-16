@@ -1,62 +1,55 @@
 ﻿#include "SerialPort.hpp"
 
+HardwareSerial *SerialPort::serial;
 
-void SerialPort::Handshake() const
-{
+void SerialPort::Handshake() const {
     uint8_t buffer[3];
     this->Read(buffer);
     this->Write(buffer, 3);
 }
 
 
-InputEnvelope* SerialPort::ReadEnvelope() const
-{
+InputEnvelope *SerialPort::ReadEnvelope() const {
     uint8_t buffer[in_env_length];
     this->Read(buffer);
-    char representation[in_env_length * 3 - 1];
+    char representation[in_env_length * 3];
     ToCharArray(buffer, representation, in_env_length);
     Logger::Info(kSerial, "reading: %s", representation);
     return InputEnvelope::FromBytes(buffer);
 }
 
-void SerialPort::WriteEnvelope(OutputEnvelope* envelope) const
-{
+void SerialPort::WriteEnvelope(OutputEnvelope *envelope) const {
     uint8_t buffer[out_env_length];
     envelope->ToBytes(buffer);
-    char representation[out_env_length * 3 - 1];
+    char representation[out_env_length * 3];
     ToCharArray(buffer, representation, out_env_length);
     Logger::Info(kSerial, "writing: %s", representation);
     this->Write(buffer, out_env_length);
 }
 
-uint8_t SerialPort::ReadHalfWayDrop() const
-{
+uint8_t SerialPort::ReadHalfWayDrop() const {
     uint8_t buffer[3];
     this->Read(buffer);
-    char representation[8];
-    ToCharArray(buffer, representation, 3);
+    char representation[in_hw_length * 3];
+    ToCharArray(buffer, representation, in_hw_length);
     Logger::Info(kSerial, "reading halfway: %s", representation);
     return buffer[1];
 }
 
-void SerialPort::WriteHalfWayPoint(const bool ignore) const
-{
-    uint8_t buffer[] = {0xfd, static_cast<uint8_t>(ignore ? 0 : 1), 0xff};
-    char representation[8];
-    ToCharArray(buffer, representation, 3);
+void SerialPort::WriteHalfWayPoint(uint8_t sides) const {
+    uint8_t buffer[] = {0xfd, sides, 0xff};
+    char representation[out_hw_length * 3];
+    ToCharArray(buffer, representation, out_hw_length);
     Logger::Info(kSerial, "writing halfway: %s", representation);
     this->Write(buffer, 3);
 }
 
-void SerialPort::Read(uint8_t* buffer) const
-{
+void SerialPort::Read(uint8_t *buffer) const {
     uint8_t last_char, index = 0;
-    do
-    {
+    do {
         last_char = ReadOneByte();
         buffer[index++] = last_char;
-    }
-    while (last_char != 0xff);
+    } while (last_char != 0xff);
     if (buffer[0] == 0xfe) throw StopConnection();
 }
 
@@ -127,28 +120,32 @@ SerialPort::~SerialPort()
 #else
 
 void SerialPort::Connect(const char *port_name, int baud_rate) {
-    Serial1.setTx(PB6);
-    Serial1.setRx(PB7);
-    Serial1.begin(baud_rate);
+//    serial->setTx(PB3);
+//    serial->setRx(PB2);
+//    serial->begin(baud_rate);
 }
 
 uint8_t SerialPort::ReadOneByte() const {
     uint8_t buffer[1];
-    while(Serial1.available() < 1);
-    Serial1.readBytes(buffer, 1);
+    while (serial->available() < 1);
+    serial->readBytes(buffer, 1);
     return buffer[0];
 }
 
 bool SerialPort::Write(uint8_t *buffer, unsigned int size) const {
-    return Serial1.write(buffer, size);
+    return serial->write(buffer, size);
 }
 
 void SerialPort::Close() const {
-    Serial1.end();
+    serial->end();
 }
 
 SerialPort::~SerialPort() {
     Close();
+}
+
+void SerialPort::SetBus(HardwareSerial *serial) {
+    SerialPort::serial = serial;
 }
 
 #endif

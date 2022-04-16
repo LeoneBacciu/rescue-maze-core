@@ -24,7 +24,9 @@
 
 class SerialPort : public Singleton<SerialPort>, BusConnection {
     static const uint8_t in_env_length = 8;
-    static const uint8_t out_env_length = 8;
+    static const uint8_t out_env_length = 9;
+    static const uint8_t in_hw_length = 3;
+    static const uint8_t out_hw_length = 3;
 
 public:
 
@@ -35,16 +37,18 @@ public:
     InputEnvelope *ReadEnvelope() const;
 
     void WriteEnvelope(OutputEnvelope *envelope) const;
-    
+
     uint8_t ReadHalfWayDrop() const;
 
-    void WriteHalfWayPoint(const bool ignore) const;
+    void WriteHalfWayPoint(uint8_t sides) const;
 
     void Read(uint8_t *buffer) const;
 
     bool Write(uint8_t buffer[], unsigned size) const;
 
     void Close() const;
+
+    static void SetBus(HardwareSerial *serial);
 
     ~SerialPort();
 
@@ -56,5 +60,7 @@ private:
     bool connected_{};
     COMSTAT status_{};
     DWORD errors_{};
+#else
+    static HardwareSerial *serial;
 #endif
 };

@@ -1,13 +1,11 @@
-#include <Notification.hpp>
 #include "Compass.hpp"
-
+#include <Notification.hpp>
 
 bool Compass::GoTo(const Direction objective, const bool ignore_current, const bool ignore_next) {
     auto serial = SerialPort::Instance();
     const int difference = direction_ - objective;
-    Logger::Info(kCompass, "going to %d, from %d, current ignore %d, next ignore %d", objective, direction_,
+    Logger::Info(kCompass, "going from %d to %d, current ignore %d, next ignore %d", direction_, objective,
                  ignore_current, ignore_next);
-    bool additional_drop = false;
     if (abs(difference) == 2) {
         Logger::Verbose(kCompass, "180 deg rotation");
         Driver::Rotate(false);
@@ -18,10 +16,13 @@ bool Compass::GoTo(const Direction objective, const bool ignore_current, const b
         else if (direction_ == kRight && objective == kBottom) side = true;
         else if (difference < 0) side = false;
         Driver::Rotate(side);
-        additional_drop = !ignore_current;
     }
-    if (additional_drop) Drop();
-    serial->WriteHalfWayPoint(!additional_drop);
+    bool ignore_halfway = (difference == 0) || ignore_current;
+    if (abs(difference) == 1 && !ignore_current) {
+        ignore_halfway = Drop();
+    }
+    if (ignore_halfway) serial->WriteHalfWayPoint(0);
+    else serial->WriteHalfWayPoint(GetSidesCode());
     uint8_t extra_drop = serial->ReadHalfWayDrop();
     if (extra_drop > 0) {
         Logger::Verbose(kCompass, "extra drop %d", extra_drop);
@@ -29,21 +30,23 @@ bool Compass::GoTo(const Direction objective, const bool ignore_current, const b
     }
     direction_ = objective;
     const bool success = Driver::Go();
-    if (!ignore_next) Drop();
+    if (!ignore_next && success) Drop();
     return success;
 }
 
 Walls *Compass::GetWalls() const {
+    delay(500);
     auto lasers = Lasers::Instance();
     const uint16_t threshold = cell_dimensions::depth;
     uint16_t tmp_walls[] = {
-            lasers->ReadF(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
+            lasers->ReadFront(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
     }, walls[4];
     for (int i = 0; i < 4; ++i) walls[(i + direction_) % 4] = tmp_walls[i];
+    Logger::Info(kCompass, "%d - wall values: %d %d %d %d", direction_, walls[0], walls[1], walls[2], walls[3]);
     return new Walls(walls[0] < threshold, walls[1] < threshold, walls[2] < threshold, walls[3] < threshold);
 }
 
-void Compass::Drop(const uint8_t force) const {
+bool Compass::Drop(const uint8_t force) const {
     auto brick = Brick::Instance();
     auto temp = Temp::Instance();
     const auto hot = temp->IsHot();
@@ -66,4 +69,11 @@ void Compass::Drop(const uint8_t force) const {
     }
     if (drop_right > 0 || drop_left > 0) pulse = true;
     if (pulse) Notification::Pulse(3);
+    return pulse;
+}
+
+uint8_t Compass::GetSidesCode() const {
+    auto lasers = Lasers::Instance();
+    const auto left = lasers->ReadL() <= cell_dimensions::depth, right = lasers->ReadR() <= cell_dimensions::depth;
+    return (left ? 0x10 : 0) | (right ? 0x01 : 0);
 }

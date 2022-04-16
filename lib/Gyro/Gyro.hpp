@@ -24,7 +24,7 @@ class Gyro : public Singleton<Gyro>, BusConnection {
 public:
     Gyro() : wire(PB11, PB10), mpu(MPU6050_DEFAULT_ADDRESS, &wire) {}
 
-    void Begin(unsigned long refresh, bool calibrate = true);
+    void Begin();
 
     float Yaw();
 
@@ -32,9 +32,11 @@ public:
 
     float Pitch();
 
-    void Calibrate(uint16_t samples = 2000);
+    void Calibrate(uint16_t samples = 10);
 
     void Update();
+
+    bool IsTilted(const uint8_t threshold = 5);
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0

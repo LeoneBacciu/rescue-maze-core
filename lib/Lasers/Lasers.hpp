@@ -30,7 +30,9 @@ public:
 
     int16_t ComputeFrontDifference();
 
-    int16_t ComputeLateralDifference(uint16_t threshold = 400, int16_t bias = 25);
+    int16_t ComputeLateralDifference(uint16_t threshold = 1000, int16_t bias = 0);
+
+    int16_t ComputeVerticalDifference(uint16_t threshold = 1000, int16_t bias = 0);
 
     uint16_t ReadFL();
 
@@ -41,6 +43,8 @@ public:
     uint16_t ReadR();
 
     uint16_t ReadB();
+
+    uint16_t ReadFront();
 
     static bool IsValidWall(uint16_t l, uint16_t c, uint16_t r, uint16_t tolerance = 10);
 
@@ -66,6 +70,8 @@ private:
     VL53L0X laserB;
     bool bHighPrecision = true;
 
+    uint8_t frontCounter = 0;
+
     void changeAddress(uint8_t laser);
 
     uint16_t Read(VL53L0X laser, uint8_t address, bool *highPrecision);
@@ -84,8 +90,8 @@ private:
         static const int8_t R = -5;
         static const int8_t FR = -5;
         static const int8_t F = -16;
-        static const int8_t FL = -2;
-        static const int8_t L = -10;
+        static const int8_t FL = 0;
+        static const int8_t L = -15;
         static const int8_t B = -16;
     };
 

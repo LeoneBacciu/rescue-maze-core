@@ -8,8 +8,8 @@
 #include "MainMaze/robot/lib/extra/utils/Singleton.hxx"
 #include "MainMaze/robot/lib/Logger/Logger.hpp"
 #else
-#define ADDR_L 0x5B
-#define ADDR_R 0x5A
+#define ADDR_L 0x5A
+#define ADDR_R 0x5B
 //#define ADDR_R 0x5A
 
 #include "Arduino.h"
@@ -23,7 +23,7 @@
 
 class Temp : public Singleton<Temp>, BusConnection {
 public:
-    uint16_t threshold = 0;
+    float threshold = 0;
 
     void Calibrate();
 

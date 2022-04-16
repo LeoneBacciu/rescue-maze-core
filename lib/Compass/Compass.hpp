@@ -10,7 +10,6 @@
 #include "MainMaze/robot/lib/Logger/Logger.hpp"
 #else
 
-#include <Driver.hpp>
 #include <utils/Singleton.hxx>
 #include <Communication/Directions.hxx>
 #include <Communication/Walls.hxx>
@@ -18,17 +17,19 @@
 #include <Brick.hpp>
 #include <Logger.hpp>
 #include <SerialPort.hpp>
+#include <Lasers.hpp>
 
 #endif
 
-class Compass : public Singleton<Compass>
-{
-	Direction direction_ = kTop;
+class Compass : public Singleton<Compass> {
+    Direction direction_ = kTop;
 
 public:
-	bool GoTo(Direction objective, bool ignore_current = true, bool ignore_next = true);
+    bool GoTo(Direction objective, bool ignore_current = true, bool ignore_next = true);
 
-	Walls* GetWalls() const;
+    Walls *GetWalls() const;
 
-	void Drop(uint8_t force = 0) const;
+    bool Drop(uint8_t force = 0) const;
+
+    uint8_t GetSidesCode() const;
 };

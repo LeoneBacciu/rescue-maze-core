@@ -10,14 +10,21 @@
 #include "Robot.hpp"
 
 TwoWire wire(PB9, PB8);
-HardwareSerial serial(PB7, PB6);
+HardwareSerial serial1(PB7, PB6);
+HardwareSerial serial2(PA3, PA2);
 
 void setup() {
-
     digitalWrite(PA15, LOW);
 
-    serial.begin(115200);
-    serial.println("STARTING");
+    serial1.begin(115200);
+    serial2.begin(115200);
+
+//    while (1) {
+//        serial2.println(serial2.available());
+//    }
+
+    serial1.println("STARTING");
+
     delay(125);
 
 
@@ -31,12 +38,12 @@ void setup() {
 
 
     wire.begin();
-    wire.setClock(400000);
+    wire.setClock(10000);
 
 
     BusConnection::SetBus(&wire);
-    Logger::SetBus(&serial);
-
+    Logger::SetBus(&serial1);
+    SerialPort::SetBus(&serial2);
 
 
     for (int i = 0; i < 8; ++i) {
@@ -45,46 +52,49 @@ void setup() {
         wire.endTransmission();
         int nDevices = 0;
 
-        serial.print("Scanning bus ");
-        serial.print(i);
-        serial.println("...");
+        serial1.print("Scanning bus ");
+        serial1.print(i);
+        serial1.println("...");
 
         for (byte address = 1; address < 127; ++address) {
             wire.beginTransmission(address);
-            byte error = wire.endTransmission();
+            byte error = wire.endTransmission(false);
 
             if (error == 0) {
-                serial.print("I2C device found at address 0x");
+                serial1.print("I2C device found at address 0x");
                 if (address < 16) {
-                    serial.print("0");
+                    serial1.print("0");
                 }
-                serial.print(address, HEX);
-                serial.println("  !");
+                serial1.print(address, HEX);
+                serial1.println("  !");
 
                 ++nDevices;
             } else if (error == 4) {
-                serial.print("Unknown error at address 0x");
+                serial1.print("Unknown error at address 0x");
                 if (address < 16) {
-                    serial.print("0");
+                    serial1.print("0");
                 }
-                serial.println(address, HEX);
+                serial1.println(address, HEX);
             }
         }
         if (nDevices == 0) {
-            serial.println("No I2C devices found\n");
+            serial1.println("No I2C devices found\n");
         } else {
-            serial.println("done\n");
+            serial1.println("done\n");
         }
     }
+//    while (1) {
+//        serial2.println("ciao");
+//        delay(250);
+//    }
+    while (!serial1.available());
 
-    while (!serial.available());
-
-    serial.println("SETUP");
+    serial1.println("SETUP");
     Robot::Setup();
 }
 
 void loop() {
-//    if (!Robot::Main()) while (1);
+    if (!Robot::Main()) while (1);
 }
 
 
@@ -101,8 +111,8 @@ void setup() {
     //1Wire.write(1 << 4);          // send byte to select bus
     //w/ire.endTransmission();
 
-    serial.begin(115200);
-    serial.println("\nI2C Scanner");
+    serial1.begin(115200);
+    serial1.println("\nI2C Scanner");
     Wire.begin((uint8_t) PB9, (uint8_t) PB8);
     Wire.setClock(400000);
 
@@ -114,9 +124,9 @@ void loop() {
   Wire.endTransmission();
   int nDevices = 0;
 
-  serial.print("Scanning bus ");
-  serial.print(i);
-  serial.println("...");
+  serial1.print("Scanning bus ");
+  serial1.print(i);
+  serial1.println("...");
 
   for (byte address = 1; address < 127; ++address) {
     // The i2c_scanner uses the return value of
@@ -126,26 +136,26 @@ void loop() {
     byte error = Wire.endTransmission();
 
     if (error == 0) {
-      serial.print("I2C device found at address 0x");
+      serial1.print("I2C device found at address 0x");
       if (address < 16) {
-        serial.print("0");
+        serial1.print("0");
       }
-      serial.print(address, HEX);
-      serial.println("  !");
+      serial1.print(address, HEX);
+      serial1.println("  !");
 
       ++nDevices;
     } else if (error == 4) {
-      serial.print("Unknown error at address 0x");
+      serial1.print("Unknown error at address 0x");
       if (address < 16) {
-        serial.print("0");
+        serial1.print("0");
       }
-      serial.println(address, HEX);
+      serial1.println(address, HEX);
     }
   }
   if (nDevices == 0) {
-    serial.println("No I2C devices found\n");
+    serial1.println("No I2C devices found\n");
   } else {
-    serial.println("done\n");
+    serial1.println("done\n");
   }
 
   if (i<7) i++;

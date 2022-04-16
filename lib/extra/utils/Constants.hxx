@@ -13,10 +13,11 @@ namespace dimensions
 }
 
 namespace movements {
-    const uint8_t touch = 20;
-    const uint8_t arrived = 50;
+    const uint8_t touch = 30;
+    const uint8_t not_touch = 30;
+    const uint8_t arrived = 60;
     const uint8_t really_near = 80;
-    const uint8_t near = 120;
+    const uint8_t near = 100;
 }
 
 namespace cell_dimensions

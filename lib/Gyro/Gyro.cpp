@@ -37,13 +37,12 @@ float Gyro::CalculateError() {
 }
 #else
 
-void Gyro::Begin(unsigned long refresh, bool calibrate) {
+void Gyro::Begin() {
     wire.begin();
     mpu.initialize();
     uint8_t devStatus = mpu.dmpInitialize();
     if (devStatus == 0) {
-        mpu.CalibrateGyro(10);
-        mpu.CalibrateAccel(10);
+        Calibrate();
         mpu.setDMPEnabled(true);
     } else {
         Logger::Error(Source::kGyro, "DMP failed");
@@ -66,7 +65,8 @@ float Gyro::Pitch() {
 }
 
 void Gyro::Calibrate(const uint16_t samples) {
-//    mpu.resetDMP();
+    mpu.CalibrateGyro(samples);
+    mpu.CalibrateAccel(samples);
 }
 
 void Gyro::Update() {
@@ -74,6 +74,11 @@ void Gyro::Update() {
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+}
+
+bool Gyro::IsTilted(const uint8_t threshold) {
+    Update();
+    return (abs(-ypr[1] * RADIANS_TO_DEGREES) + abs(-ypr[2] * RADIANS_TO_DEGREES)) > threshold;
 }
 
 #endif

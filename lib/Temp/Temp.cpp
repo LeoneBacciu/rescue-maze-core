@@ -3,7 +3,7 @@
 
 GeometricPair<bool> Temp::IsHot() {
     const auto measures = Read();
-    Logger::Info(kTemp, "temp: %.3f, %.3f", measures.left, measures.right);
+    Logger::Info(kTemp, "%.1f temp: %.1f, %.1f", threshold, measures.left, measures.right);
     return {
         measures.left > threshold,
         measures.right > threshold
@@ -56,14 +56,17 @@ GeometricPair<float> Temp::Read() {
 }
 
 float Temp::readTemp(uint8_t addr) {
-    uint16_t ret;
+    uint8_t buffer[3];
     GetBus()->beginTransmission(addr); // start transmission to device
     GetBus()->write(0x07);                 // sends register address to ReadF from
     GetBus()->endTransmission(false);   // end transmission
     GetBus()->requestFrom(addr, (uint8_t) 3); // send data n-bytes ReadF
-    ret = GetBus()->read() | GetBus()->read() << 8;
+    uint16_t temp = GetBus()->read() | GetBus()->read() << 8;
     __unused uint8_t pec = GetBus()->read();
-    return ((float) ret * .02f) - 273.15;
+
+//    GetBus()->readBytes(buffer, 3);
+//    uint16_t temp = uint16_t(buffer[0]) | (uint16_t(buffer[1]) << 8);
+    return ((float) temp * .02f) - 273.15;
 }
 
 #endif

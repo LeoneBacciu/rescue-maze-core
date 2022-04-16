@@ -24,13 +24,8 @@
 #define INV_L1 PB14
 #define INV_L2 PB15
 
-#include <Gyro.hpp>
-#include <Floor.hpp>
-#include <Lasers.hpp>
-#include <Logger.hpp>
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
-#include <utils/Math.hxx>
 
 #endif
 #define C_NEGATE(a, b) (!a&b || a&!b)
@@ -40,8 +35,8 @@ class Driver : BusConnection {
     static const uint8_t lateral_compensation_multiplier = 5;
 
     enum Speeds : uint8_t {
-//        kBreak = 100, kSlow = 100, kRotateSlow = 120, kMedium = 100, kRotateFast = 200, kFast = 150
-        kBreak = 100, kSlow = 150, kRotateSlow = 120, kMedium = 175, kRotateFast = 200, kFast = 225
+//        kBreak = 100, kSlow = 125, kRotateSlow = 150, kMedium = 200, kRotateFast = 250, kFast = 250
+        kBreak = 100, kSlow = 125, kRotateSlow = 150, kMedium = 150, kRotateFast = 250, kFast = 200, kVeryFast = 250
     };
 
 public:
@@ -51,7 +46,11 @@ public:
 
     static void SetSpeed(int l, int r);
 
-private:
+    static void Pause();
+
+    static void Resume();
+
+//private:
 
     static bool AdjustFront(bool right = true);
 
@@ -69,5 +68,9 @@ private:
 
     static void Break(int l, int r, int time = 100);
 
-    static void ReturnToAngle(float goal);
+    static void ReturnToAngle(float goal, bool fast = false);
+
+    static bool ExpensiveCenter();
+
+    static int speedL, speedR;
 };

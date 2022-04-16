@@ -1,6 +1,6 @@
 ﻿#include "Lasers.hpp"
+#include <Driver.hpp>
 
-#include <utility>
 #include <utils/Math.hxx>
 
 
@@ -115,32 +115,32 @@ float Lasers::MakeError(const float value) const
 void Lasers::Begin() {
     changeAddress(ADDRESSES::R);
     laserR.init(GetBus());
-    laserR.setTimeout(60);
+    laserR.setTimeout(100);
     laserR.setHighPrecision();
     Logger::Verbose(kLasers, "R ok");
     changeAddress(ADDRESSES::FR);
     laserFR.init(GetBus());
-    laserFR.setTimeout(60);
+    laserFR.setTimeout(100);
     laserFR.setHighPrecision();
     Logger::Verbose(kLasers, "FR ok");
     changeAddress(ADDRESSES::F);
     laserF.init(GetBus());
-    laserF.setTimeout(60);
+    laserF.setTimeout(100);
     laserF.setHighPrecision();
     Logger::Verbose(kLasers, "F ok");
     changeAddress(ADDRESSES::FL);
     laserFL.init(GetBus());
-    laserFL.setTimeout(60);
+    laserFL.setTimeout(100);
     laserFL.setHighPrecision();
     Logger::Verbose(kLasers, "FL ok");
     changeAddress(ADDRESSES::L);
     laserL.init(GetBus());
-    laserL.setTimeout(60);
+    laserL.setTimeout(100);
     laserL.setHighPrecision();
     Logger::Verbose(kLasers, "L ok");
     changeAddress(ADDRESSES::B);
     laserB.init(GetBus());
-    laserB.setTimeout(60);
+    laserB.setTimeout(100);
     laserB.setHighPrecision();
     Logger::Verbose(kLasers, "B ok");
 }
@@ -201,14 +201,28 @@ int16_t Lasers::ComputeLateralDifference(const uint16_t threshold, const int16_t
     return static_cast<float>(diff) / static_cast<float>(cells);
 }
 
+int16_t Lasers::ComputeVerticalDifference(uint16_t threshold, int16_t bias) {
+    uint16_t f, b, trials = 5;
+    do {
+        f = ReadF();
+        b = ReadB();
+        trials--;
+        delay(1);
+    } while (trials > 0 && (!math::InRange<uint16_t>(f, 1, 8000) || !math::InRange<uint16_t>(b, 1, 8000)));
+    if (f > threshold || b > threshold) return 0;
+    uint16_t cells = std::max<float>((float) f / cell_dimensions::depth + (float) b / cell_dimensions::depth, 1);
+    int16_t diff = f % cell_dimensions::depth - b % cell_dimensions::depth + bias;
+    return static_cast<float>(diff) / static_cast<float>(cells);
+}
+
 void Lasers::changeAddress(uint8_t laser) {
-    delay(1);
+    delay(10);
     if (laser > 7 || laser == current_bus) return;
     GetBus()->beginTransmission(0x70);
     GetBus()->write(1 << laser);
     GetBus()->endTransmission();
     current_bus = laser;
-    delay(1);
+    delay(10);
 }
 
 
@@ -249,10 +263,18 @@ int16_t Lasers::FrontDifference(const uint16_t l, const uint16_t r, const int16_
 uint16_t Lasers::Read(VL53L0X laser, uint8_t address, bool *highPrecision) {
     changeAddress(address);
     uint16_t measure = continuous ? laser.readRangeContinuousMillimeters() : laser.readRangeSingleMillimeters();
-    if (measure > 65535 || measure <= 0) {
+    if (measure >= 60000 || measure <= 0) {
+        Driver::Pause();
+        Logger::Error(kLasers, "%d died", address);
+        GetBus()->begin();
+        GetBus()->setClock(10000);
+        delay(25);
         Begin();
         if (continuous) StartContinuous();
         changeAddress(address);
+        measure = continuous ? laser.readRangeContinuousMillimeters() : laser.readRangeSingleMillimeters();
+        Logger::Error(kLasers, "%d: %d", address, measure);
+        Driver::Resume();
     }
     return measure;
     if (measure < 600) {
@@ -273,6 +295,13 @@ uint16_t Lasers::Read(VL53L0X laser, uint8_t address, bool *highPrecision) {
         }
     }
     return measure;
+}
+
+uint16_t Lasers::ReadFront() {
+    frontCounter = ++frontCounter % 3;
+    if (frontCounter == 0) return ReadFL();
+    if (frontCounter == 1) return ReadF();
+    if (frontCounter == 2) return ReadFR();
 }
 
 
