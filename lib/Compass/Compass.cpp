@@ -30,7 +30,9 @@ bool Compass::GoTo(const Direction objective, const bool ignore_current, const b
     }
     direction_ = objective;
     const bool success = Driver::Go();
-    if (!ignore_next && success) Drop();
+    if (!ignore_next && success) {
+        if (Drop()) last_drop = true;
+    }
     return success;
 }
 
@@ -39,7 +41,7 @@ Walls *Compass::GetWalls() const {
     auto lasers = Lasers::Instance();
     const uint16_t threshold = cell_dimensions::depth;
     uint16_t tmp_walls[] = {
-            lasers->ReadFront(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
+            lasers->ReadFrontMin(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
     }, walls[4];
     for (int i = 0; i < 4; ++i) walls[(i + direction_) % 4] = tmp_walls[i];
     Logger::Info(kCompass, "%d - wall values: %d %d %d %d", direction_, walls[0], walls[1], walls[2], walls[3]);
@@ -68,7 +70,7 @@ bool Compass::Drop(const uint8_t force) const {
         Logger::Verbose(kCompass, "no drop");
     }
     if (drop_right > 0 || drop_left > 0) pulse = true;
-    if (pulse) Notification::Pulse(3);
+    if (pulse) Notification::Pulse(5);
     return pulse;
 }
 

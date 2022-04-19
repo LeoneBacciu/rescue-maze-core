@@ -1,11 +1,10 @@
 #include "Floor.hpp"
 
 Floor::FloorType Floor::Read() {
-//    return kWhite;
     const uint32_t color = ReadRaw();
     Logger::Verbose(kFloor, "reading floor -> %d, (%d)", color, blackCounter);
-    if (color < 40) return kCheckpoint;
-    if (color > 250 && color < 320) {
+    if (color < threshold - 100) return kCheckpoint;
+    if (color > threshold + 50 && color < threshold + 150) {
         if (++blackCounter > 2) return kBlack;
         else return kWhite;
     }
@@ -43,6 +42,15 @@ uint32_t Floor::ReadRaw() const
 
 uint32_t Floor::ReadRaw() const {
     return analogRead(FLOOR_PIN);
+}
+
+void Floor::Calibrate() {
+    threshold = 0;
+    for (int i = 0; i < 10; i++) {
+        threshold += ReadRaw();
+        delay(10);
+    }
+    threshold /= 10;
 }
 
 #endif

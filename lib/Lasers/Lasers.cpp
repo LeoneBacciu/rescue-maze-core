@@ -210,9 +210,13 @@ int16_t Lasers::ComputeVerticalDifference(uint16_t threshold, int16_t bias) {
         delay(1);
     } while (trials > 0 && (!math::InRange<uint16_t>(f, 1, 8000) || !math::InRange<uint16_t>(b, 1, 8000)));
     if (f > threshold || b > threshold) return 0;
-    uint16_t cells = std::max<float>((float) f / cell_dimensions::depth + (float) b / cell_dimensions::depth, 1);
-    int16_t diff = f % cell_dimensions::depth - b % cell_dimensions::depth + bias;
-    return static_cast<float>(diff) / static_cast<float>(cells);
+
+    int32_t f_remainder = f % cell_dimensions::depth;
+    int32_t b_remainder = b % cell_dimensions::depth;
+    f_remainder = f_remainder > dimensions::depth ? f_remainder - cell_dimensions::depth : f_remainder;
+    b_remainder = b_remainder > dimensions::depth ? b_remainder - cell_dimensions::depth : b_remainder;
+
+    return f_remainder - b_remainder + bias;
 }
 
 void Lasers::changeAddress(uint8_t laser) {
@@ -248,6 +252,11 @@ uint16_t Lasers::ReadL() {
 
 uint16_t Lasers::ReadB() {
     return Read(laserB, ADDRESSES::B, &bHighPrecision) + BIASES::B;
+}
+
+uint16_t Lasers::ReadFrontMin() {
+    auto l = ReadFL(), c = ReadF(), r = ReadFR();
+    return min(l, min(c, r));
 }
 
 bool Lasers::IsValidWall(const uint16_t l, const uint16_t c, const uint16_t r, const uint16_t tolerance) {
@@ -300,9 +309,10 @@ uint16_t Lasers::Read(VL53L0X laser, uint8_t address, bool *highPrecision) {
 uint16_t Lasers::ReadFront() {
     frontCounter = ++frontCounter % 3;
     if (frontCounter == 0) return ReadFL();
-    if (frontCounter == 1) return ReadF();
     if (frontCounter == 2) return ReadFR();
+    return ReadF();
 }
+
 
 
 #endif

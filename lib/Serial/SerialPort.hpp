@@ -32,7 +32,7 @@ public:
 
     void Connect(const char *port_name, int baud_rate);
 
-    void Handshake() const;
+    bool Handshake() const;
 
     InputEnvelope *ReadEnvelope() const;
 

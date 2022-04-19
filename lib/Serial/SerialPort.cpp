@@ -2,10 +2,13 @@
 
 HardwareSerial *SerialPort::serial;
 
-void SerialPort::Handshake() const {
-    uint8_t buffer[3];
-    this->Read(buffer);
+bool SerialPort::Handshake() const {
+    auto key = static_cast<uint8_t>(random(0, 0xfc));
+    uint8_t buffer[] = {0xfc, key, 0xff};
     this->Write(buffer, 3);
+    this->Read(buffer);
+    Logger::Info(kSerial, "handshake %02X -> %02X", key, buffer[1]);
+    return buffer[1] == key;
 }
 
 

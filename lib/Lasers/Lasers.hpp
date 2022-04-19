@@ -46,6 +46,8 @@ public:
 
     uint16_t ReadFront();
 
+    uint16_t ReadFrontMin();
+
     static bool IsValidWall(uint16_t l, uint16_t c, uint16_t r, uint16_t tolerance = 10);
 
     static int16_t FrontDifference(uint16_t l, uint16_t r, int16_t bias = 4);

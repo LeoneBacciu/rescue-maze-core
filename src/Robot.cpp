@@ -39,19 +39,12 @@ void Robot::Setup() {
 
 
     temp_->Calibrate();
-//    gyro_->Calibrate();
-//    temp_->Calibrate();
+//    floor_->Calibrate();
 
 
     Logger::Verbose(kGeneric, "start");
 
     delay(1000);
-
-//    while (1) {
-//        const auto f = floor_->Read();
-//        Logger::Info(kFloor, "%d", f);
-//        delay(500);
-//    }
 
 //    while (1) {
 //        const auto t = temp_->IsHot();
@@ -61,6 +54,11 @@ void Robot::Setup() {
 
 //    Driver::SetSpeed(100, 100);
 //    while (1);
+//
+//    while (1){
+//        floor_->Read();
+//        delay(500);
+//    }
 
 //    while (1) {
 //        Logger::Info(kGyro, "p: %.2f, r: %.2f, %d", gyro_->Pitch(), gyro_->Roll(), gyro_->IsTilted());
@@ -79,7 +77,7 @@ void Robot::Setup() {
 //
 //    lasers_->StartContinuous();
 //    while (1) {
-//        Logger::Info(kLasers, "%d - %d = %d", lasers_->ReadL(), lasers_->ReadR(), lasers_->ComputeLateralDifference());
+//        Logger::Info(kLasers, "%d - %d = %d", lasers_->ReadF(), lasers_->ReadB(), lasers_->ComputeVerticalDifference());
 //        Logger::Info(kGeneric, "%d %d %d %d", lasers_->ReadF(), lasers_->ReadR(), lasers_->ReadL(), lasers_->ReadB());
 //        const auto t = temp_->IsHot();
 //        Logger::Info(kTemp, "%d   %d", t.left, t.right);
@@ -108,45 +106,42 @@ void Robot::Setup() {
 //    }
 
 //    Driver::Rotate(true);
-//    Driver::Go();
-//    Driver::Go();
-//    Driver::Go();
-//    Driver::Rotate(false);
-//    Driver::Rotate(false);
-//    Driver::Go();
-//    Driver::Rotate(true);
-//    Driver::Go();
-//    while (1);
-//    delay(1000);
 //    Driver::CenterCell();
-//    delay(1000);
+//    Driver::Go();
+//    Driver::Rotate(false);
+//    Driver::Rotate(true);
+//    Driver::Go();
+//    Driver::Rotate(false);
+//    Driver::Go();
+//    Driver::Go();
+//    Driver::Go();
+//    Driver::Rotate(false);
+//    Driver::Rotate(false);
+//    Driver::Go();
+//    Driver::Rotate(true);
+//    Driver::Go();
+//    Driver::Rotate(true);
+//    Driver::Go();
+//    Driver::Go();
+//    Driver::Rotate(false);
+//    Driver::Go();
+//    Driver::Rotate(false);
+//    Driver::Rotate(true);
+//    Driver::Rotate(false);
+//    Driver::Go();
+//    Driver::Go();
+//    Driver::Rotate(false);
+//    Driver::Rotate(true);
+//    Driver::Rotate(false);
+//    Driver::Go();
+//    Driver::Go();
+//    Driver::Rotate(true);
+//    Driver::Go();
+//    Driver::Rotate(true);
+//    Driver::Go();
 //    Driver::Go();
 //    while (1);
-//    Driver::Rotate(true);
-//    Driver::Go();
-//    Driver::Rotate(false);
-//    Driver::Go();
-//    Driver::Rotate(false);
-//    Driver::Rotate(false);
-//    Driver::Go();
-//    Driver::Rotate(true);
-//    Driver::Go();
-//    while (1);
-//    Driver::Rotate(true);
-//    Driver::Go();
-//    while (1);
-//    Driver::Rotate(true);
-//    Driver::Go();
-//    Driver::Rotate(true);
-//    Driver::Go();
-//    Driver::Rotate(false);
-//    Driver::Go();
-//    Driver::Rotate(false);
-//    Driver::Go();
-//    Driver::Rotate(true);
-//    Driver::Rotate(true);
-//    while (1);
-    ;
+//    ;
 
 //    SetSpeed(150, -150);
 
@@ -225,13 +220,19 @@ void Robot::Setup() {
 
     serial_->Connect("", 115200);
 
-    serial_->Handshake();
+    auto connected = serial_->Handshake();
+    if (!connected) {
+        while (1) Notification::Pulse();
+    }
+
+    Driver::CenterCell();
 }
 
 bool Robot::Main() {
     Walls *walls = compass_->GetWalls();
     const auto floor_type = floor_->Read();
-    const auto sides = compass_->GetSidesCode();
+    const auto sides = compass_->last_drop ? 0 : compass_->GetSidesCode();
+    compass_->last_drop = false;
 
     auto *output_envelope = new OutputEnvelope(walls, !success_, floor_type == Floor::kCheckpoint, sides);
 

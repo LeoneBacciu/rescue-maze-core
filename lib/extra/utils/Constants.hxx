@@ -6,6 +6,7 @@
 
 namespace dimensions
 {
+    const uint8_t depth_tolerance = 150;
 	const uint8_t width = 110;
 	const uint8_t height = 120;
 	const uint8_t depth = 200;

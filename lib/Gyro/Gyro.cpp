@@ -42,7 +42,7 @@ void Gyro::Begin() {
     mpu.initialize();
     uint8_t devStatus = mpu.dmpInitialize();
     if (devStatus == 0) {
-        Calibrate();
+        LoadCalibration();
         mpu.setDMPEnabled(true);
     } else {
         Logger::Error(Source::kGyro, "DMP failed");
@@ -67,18 +67,43 @@ float Gyro::Pitch() {
 void Gyro::Calibrate(const uint16_t samples) {
     mpu.CalibrateGyro(samples);
     mpu.CalibrateAccel(samples);
+    gyroOffsets[0] = mpu.getXGyroOffset();
+    gyroOffsets[1] = mpu.getYGyroOffset();
+    gyroOffsets[2] = mpu.getZGyroOffset();
+    accelOffsets[0] = mpu.getXAccelOffset();
+    accelOffsets[1] = mpu.getYAccelOffset();
+    accelOffsets[2] = mpu.getZAccelOffset();
+    calibrated = true;
 }
 
 void Gyro::Update() {
-    mpu.dmpGetCurrentFIFOPacket(fifoBuffer);
-    mpu.dmpGetQuaternion(&q, fifoBuffer);
-    mpu.dmpGetGravity(&gravity, &q);
-    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    if (millis() - lastMillis > 50) {
+        mpu.dmpGetCurrentFIFOPacket(fifoBuffer);
+        mpu.dmpGetQuaternion(&q, fifoBuffer);
+        mpu.dmpGetGravity(&gravity, &q);
+        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+        lastMillis = millis();
+    }
 }
 
 bool Gyro::IsTilted(const uint8_t threshold) {
     Update();
-    return (abs(-ypr[1] * RADIANS_TO_DEGREES) + abs(-ypr[2] * RADIANS_TO_DEGREES)) > threshold;
+    const auto v = (abs(-ypr[1] * RADIANS_TO_DEGREES) + abs(-ypr[2] * RADIANS_TO_DEGREES));
+//    Logger::Verbose(kGyro, "tilt: %.2f", v);
+    return v > threshold;
+}
+
+void Gyro::LoadCalibration() {
+    if (calibrated) {
+        mpu.setXGyroOffset(gyroOffsets[0]);
+        mpu.setYGyroOffset(gyroOffsets[1]);
+        mpu.setZGyroOffset(gyroOffsets[2]);
+        mpu.setXAccelOffset(accelOffsets[0]);
+        mpu.setYAccelOffset(accelOffsets[1]);
+        mpu.setZAccelOffset(accelOffsets[2]);
+    } else {
+        Calibrate();
+    }
 }
 
 #endif

@@ -32,4 +32,6 @@ public:
     bool Drop(uint8_t force = 0) const;
 
     uint8_t GetSidesCode() const;
+
+    bool last_drop = false;
 };

@@ -19,10 +19,6 @@ void setup() {
     serial1.begin(115200);
     serial2.begin(115200);
 
-//    while (1) {
-//        serial2.println(serial2.available());
-//    }
-
     serial1.println("STARTING");
 
     delay(125);
@@ -35,6 +31,11 @@ void setup() {
     pinMode(PB14, OUTPUT);
     pinMode(PB15, OUTPUT);
     pinMode(PA8, OUTPUT);
+
+    pinMode(PB4, INPUT_PULLDOWN);
+    pinMode(PA0, INPUT_FLOATING);
+
+    randomSeed(analogRead(PA0));
 
 
     wire.begin();
@@ -83,11 +84,8 @@ void setup() {
             serial1.println("done\n");
         }
     }
-//    while (1) {
-//        serial2.println("ciao");
-//        delay(250);
-//    }
-    while (!serial1.available());
+
+    while (!digitalRead(PB4));
 
     serial1.println("SETUP");
     Robot::Setup();

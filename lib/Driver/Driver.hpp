@@ -40,7 +40,7 @@ class Driver : BusConnection {
     };
 
 public:
-    static void Rotate(bool right);
+    static void Rotate(bool right, bool center_start = true, bool center_end = true);
 
     static bool Go();
 
@@ -64,7 +64,7 @@ public:
 
     static bool GoCondition(bool use_front, uint16_t current, uint16_t objective);
 
-    static void CenterCell();
+    static bool CenterCell();
 
     static void Break(int l, int r, int time = 100);
 
@@ -73,4 +73,6 @@ public:
     static bool ExpensiveCenter();
 
     static int speedL, speedR;
+
+    static bool center_next;
 };

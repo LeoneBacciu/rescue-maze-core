@@ -7,8 +7,8 @@
 void Notification::Pulse(uint8_t times) {
     for (int i = 0; i < times; ++i) {
         digitalWrite(PA8, HIGH);
-        delay(250);
+        delay(500);
         digitalWrite(PA8, LOW);
-        delay(250);
+        delay(500);
     }
 }

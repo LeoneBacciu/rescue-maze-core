@@ -36,7 +36,7 @@ public:
 
     void Update();
 
-    bool IsTilted(const uint8_t threshold = 5);
+    bool IsTilted(uint8_t threshold = 10);
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
@@ -53,5 +53,12 @@ private:
     Quaternion q;
     VectorFloat gravity;
     float ypr[3];
+
+    bool calibrated = false;
+    int16_t gyroOffsets[3], accelOffsets[3];
+
+    uint32_t lastMillis = 0;
+
+    void LoadCalibration();
 #endif
 };

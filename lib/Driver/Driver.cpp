@@ -7,19 +7,21 @@
 
 int Driver::speedL = 0;
 int Driver::speedR = 0;
+bool Driver::center_next = false;
 
-void Driver::Rotate(const bool right) {
+void Driver::Rotate(const bool right, const bool center_start, const bool center_end) {
     Gyro *gyro = Gyro::Instance();
 
     Logger::Info(kDrivers, "rotating %s", right ? "right" : "left");
     const int8_t direction_multiplier = right ? 1 : -1;
 
-    CenterCell();
+    auto tilted = center_start && CenterCell();
 
     const float start = gyro->Yaw();
     float goal = math::ClampAngle(start - 70 * direction_multiplier);
     float current = start;
     const float minimum = math::ClampAngle(start + (right ? 10 : -10));
+
 
     SetSpeed(kRotateFast * direction_multiplier, -kRotateFast * direction_multiplier);
 
@@ -31,6 +33,7 @@ void Driver::Rotate(const bool right) {
         current_time = millis();
         if (current_time - timer_100 >= 100) {
             Logger::Verbose(kDrivers, "main rotation -> start: %.2f, obj: %.2f, curr: %.2f", start, goal, current);
+            if (!tilted) tilted = gyro->IsTilted();
             timer_100 = millis();
         }
         if (current_time - timer_10 >= 10) {
@@ -45,22 +48,28 @@ void Driver::Rotate(const bool right) {
     timer_10 = current_time;
     timer_100 = current_time;
 
+    int16_t trials = 100;
     goal = math::ClampAngle(start - 85.f * direction_multiplier);
     while (turn_condition(start, current, goal)) {
         current_time = millis();
         if (current_time - timer_100 >= 100) {
             Logger::Verbose(kDrivers, "final rotation -> start: %.2f, obj: %.2f, curr: %.2f", start, goal,
                             current);
+            if (!tilted) tilted = gyro->IsTilted();
             timer_100 = millis();
         }
         if (current_time - timer_10 >= 10) {
+            if (--trials < 0) {
+                SetSpeed(kRotateFast * direction_multiplier, -kRotateFast * direction_multiplier);
+            }
             timer_10 = millis();
             current = gyro->Yaw();
         }
     }
     Break(-kRotateSlow * direction_multiplier, kRotateSlow * direction_multiplier);
-    CenterCell();
-    Logger::Info(kDrivers, "rotation finished");
+    tilted |= center_end && CenterCell();
+    if (tilted) center_next = true;
+    Logger::Info(kDrivers, "rotation finished (%d)", tilted);
 }
 
 bool Driver::Go() {
@@ -135,14 +144,14 @@ bool Driver::Go() {
             delta *= 2;
 
             if (!tilted) {
-                tilted = gyro->IsTilted();
+                tilted = gyro->IsTilted(5);
             }
             if (near) {
-                tilted = gyro->IsTilted();
-                if (tilted) next_tilted = true;
+                tilted = gyro->IsTilted(5);
+                if (tilted && !next_tilted) next_tilted = true;
             }
             speed = tilted ? kVeryFast : (really_near ? kSlow : (near ? kMedium : kFast));
-            if (!rear && !tilted) {
+            if (!(rear || tilted || next_tilted)) {
                 if (floor->Read() == Floor::kBlack) rear = true;
             }
             auto s = rear ? -speed : speed;
@@ -158,13 +167,17 @@ bool Driver::Go() {
     Logger::Error(kDrivers, "stuff %d %d %.2f", next_tilted, lateral_difference, end_diff);
 
     if (next_tilted ||
-        (lateral_difference < 15 || abs(end_diff) < 15) ||
-        !ExpensiveCenter()) {
+        (lateral_difference < 15 && abs(end_diff) < 15) ||
+        !center_next && !ExpensiveCenter()) {
         ReturnToAngle(start_rotation, next_tilted);
         CenterCell();
     }
 
     Logger::Info(kDrivers, "go forward finished%s", rear ? " (aborted)" : "");
+    if (center_next) {
+        ExpensiveCenter();
+        center_next = false;
+    }
     return !rear;
 }
 
@@ -229,45 +242,60 @@ bool Driver::GoCondition(const bool use_front, const uint16_t current, const uin
     return r;
 }
 
-void Driver::CenterCell() {
+bool Driver::CenterCell() {
     Lasers *lasers = Lasers::Instance();
     Gyro *gyro = Gyro::Instance();
     const uint16_t f = lasers->ReadFront(), b = lasers->ReadB();
     bool use_front = f < b;
     uint16_t distance = use_front ? f : b;
+    bool tilted = false;
 
-    if (distance > (cell_dimensions::depth / 2) + cell_dimensions::depth) return;
+    if (distance > (cell_dimensions::depth / 2) + cell_dimensions::depth * 2) return false;
 
     if (distance > (cell_dimensions::depth / 2)) {
         int16_t diff, trials = 10;
         do {
+            if (gyro->IsTilted()) {
+                tilted = true;
+                break;
+            }
             diff = lasers->ComputeVerticalDifference();
             Logger::Verbose(kDrivers, "center middle %d", diff);
-            SetSpeed(kMedium * (diff > 0 ? 1 : -1), kMedium * (diff > 0 ? 1 : -1));
+            int speed = abs(diff) > 30 ? kMedium : kSlow;
+            SetSpeed(speed * (diff > 0 ? 1 : -1), speed * (diff > 0 ? 1 : -1));
+            delay(25);
         } while (abs(diff) > 10 && --trials > 0);
-        Break(kMedium * (diff > 0 ? -1 : 1), kMedium * (diff > 0 ? -1 : 1));
-        return;
+        Break(kBreak * (diff > 0 ? -1 : 1), kBreak * (diff > 0 ? -1 : 1), 200);
+        return tilted;
     }
 
     int speed = kMedium * (use_front ? 1 : -1);
-    Driver::SetSpeed(speed, speed);
-    while (distance >= movements::touch) {
+    int16_t trials = 20;
+    auto start_angle = gyro->Yaw();
+    while (distance >= movements::touch && --trials > 0) {
+        if (gyro->IsTilted()) {
+            tilted = true;
+            break;
+        }
+        auto delta = math::AngleDifference(gyro->Yaw(), start_angle) * -5;
+        Driver::SetSpeed(speed - delta, speed + delta);
         distance = (use_front ? lasers->ReadFront() : lasers->ReadB());
         Logger::Verbose(kDrivers, "center first %d", distance);
         delay(100);
     }
+    trials = 20;
     delay(250);
-    auto start_angle = gyro->Yaw();
-    Driver::SetSpeed(-speed, -speed);
-    while (distance <= movements::not_touch) {
+    start_angle = gyro->Yaw();
+    while (distance <= movements::not_touch && --trials > 0) {
+        auto delta = math::AngleDifference(gyro->Yaw(), start_angle) * -10;
+        Driver::SetSpeed(-speed - delta, -speed + delta);
         distance = (use_front ? lasers->ReadFront() : lasers->ReadB());
         Logger::Verbose(kDrivers, "center second %d", distance);
-        Driver::SetSpeed(-speed, -speed);
-        gyro->Update();
         delay(100);
     }
     Break(speed, speed);
     ReturnToAngle(start_angle);
+    return tilted;
 }
 
 void Driver::Break(int l, int r, int time) {
@@ -281,9 +309,10 @@ void Driver::ReturnToAngle(float goal, bool fast) {
     uint8_t factor = fast ? 10 : 5;
     auto current_rotation = gyro->Yaw();
     auto delta_angle = math::AngleDifference(current_rotation, goal);
-    delta_angle += delta_angle > 0 ? factor : -factor;
     Logger::Info(kDrivers, "final go adjusting -> diff: %.2f", delta_angle);
+    if (delta_angle < 2) return;
     bool align_right = delta_angle > 0;
+    goal += align_right ? factor : -factor;
     auto speed = fast ? kRotateFast : kRotateSlow;
 
     SetSpeed(speed * (align_right ? 1 : -1), speed * (align_right ? -1 : 1));
@@ -297,6 +326,7 @@ void Driver::ReturnToAngle(float goal, bool fast) {
     auto current_time = millis();
     auto timer_50 = current_time;
     auto timer_25 = current_time;
+    int16_t trials = 40;
     while (condition(current_rotation, goal)) {
         current_time = millis();
         if (current_time >= timer_50 + 50) {
@@ -305,6 +335,9 @@ void Driver::ReturnToAngle(float goal, bool fast) {
             timer_50 = millis();
         }
         if (current_time >= timer_25 + 25) {
+            if (--trials < 0) {
+                SetSpeed(kRotateFast * (align_right ? 1 : -1), kRotateFast * (align_right ? -1 : 1));
+            }
             current_rotation = gyro->Yaw();
             timer_25 = millis();
         }
@@ -318,14 +351,24 @@ bool Driver::ExpensiveCenter() {
     Logger::Info(kDrivers, "expensive center");
     if (gyro->IsTilted()) return false;
     if (lasers->ReadR() < cell_dimensions::depth) {
+        Rotate(false, false);
         Rotate(true);
-        Rotate(false);
     } else if (lasers->ReadL() < cell_dimensions::depth) {
+        Rotate(true, false);
         Rotate(false);
-        Rotate(true);
     } else {
         return false;
     }
+    int16_t diff, trials = 10;
+    do {
+        diff = lasers->ComputeVerticalDifference();
+        Logger::Verbose(kDrivers, "center middle %d", diff);
+        int speed = abs(diff) > 30 ? kMedium : kSlow;
+        SetSpeed(speed * (diff > 0 ? 1 : -1), speed * (diff > 0 ? 1 : -1));
+        delay(25);
+    } while (abs(diff) > 10 && --trials > 0);
+    Break(kBreak * (diff > 0 ? -1 : 1), kBreak * (diff > 0 ? -1 : 1), 200);
+
     return true;
 }
 

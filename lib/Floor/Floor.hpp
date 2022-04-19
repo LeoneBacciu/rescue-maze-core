@@ -17,7 +17,9 @@ public:
 	enum FloorType { kBlack, kCheckpoint, kWhite };
 	FloorType Read();
     uint32_t ReadRaw() const;
+    void Calibrate();
 
 private:
     uint8_t blackCounter = 0;
+    uint32_t threshold = 180;
 };
