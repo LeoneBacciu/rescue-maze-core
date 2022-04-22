@@ -13,7 +13,6 @@ using namespace std::chrono;
 
 #include <BusConnection.hpp>
 #include <utils/Singleton.hxx>
-#include <Madgwick/MadgwickAHRS.h>
 #include <Logger.hpp>
 #include "MPU6050_6Axis_MotionApps20.h"
 
@@ -36,7 +35,9 @@ public:
 
     void Update();
 
-    bool IsTilted(uint8_t threshold = 10);
+    bool IsTilted(uint8_t threshold = 5);
+
+    int8_t IsRamp(uint8_t pitch_threshold = 15, uint8_t roll_threshold = 20);
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
@@ -58,6 +59,8 @@ private:
     int16_t gyroOffsets[3], accelOffsets[3];
 
     uint32_t lastMillis = 0;
+
+    int ramp_buffer = 0;
 
     void LoadCalibration();
 #endif

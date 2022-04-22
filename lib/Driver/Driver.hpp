@@ -31,12 +31,22 @@
 #define C_NEGATE(a, b) (!a&b || a&!b)
 
 class Driver : BusConnection {
-    static const uint8_t max_lateral_compensation_speed = 40;
-    static const uint8_t lateral_compensation_multiplier = 5;
+    static const uint8_t max_lateral_compensation_speed = 50;
+    static const uint8_t lateral_compensation_multiplier = 6;
+
+    static const uint8_t max_lateral_compensation_speed_ramp = 100;
+    static const uint8_t lateral_compensation_multiplier_ramp = 10;
 
     enum Speeds : uint8_t {
 //        kBreak = 100, kSlow = 125, kRotateSlow = 150, kMedium = 200, kRotateFast = 250, kFast = 250
-        kBreak = 100, kSlow = 125, kRotateSlow = 150, kMedium = 150, kRotateFast = 250, kFast = 200, kVeryFast = 250
+        kBreak = 100,
+        kBreakHard = 200,
+        kSlow = 125,
+        kRotateSlow = 150,
+        kMedium = 150,
+        kRotateFast = 250,
+        kFast = 200,
+        kVeryFast = 250
     };
 
 public:
@@ -62,13 +72,15 @@ public:
 
     static bool LeftAdjustCondition(uint16_t l, uint16_t c, uint16_t r);
 
-    static bool GoCondition(bool use_front, uint16_t current, uint16_t objective);
+    static bool GoCondition(bool use_front, uint16_t current, uint16_t objective, uint8_t is_ramp, float pitch);
 
     static bool CenterCell();
 
     static void Break(int l, int r, int time = 100);
 
     static void ReturnToAngle(float goal, bool fast = false);
+
+    static void PartialCenter(float start_angle, bool up);
 
     static bool ExpensiveCenter();
 

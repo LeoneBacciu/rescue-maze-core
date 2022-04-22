@@ -64,7 +64,7 @@ THE SOFTWARE.
         
         #define strcpy_P(dest, src) strcpy((dest), (src))
         #define strcat_P(dest, src) strcat((dest), (src))
-        #define strcmp_P(a, B) strcmp((a), (B))
+        #define strcmp_P(a, b) strcmp((a), (b))
         
         #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
         #define pgm_read_word(addr) (*(const unsigned short *)(addr))
@@ -259,7 +259,7 @@ static const unsigned char dmpMemory[MPU6050_DMP_CODE_SIZE] PROGMEM = {
 };
 
 #ifndef MPU6050_DMP_FIFO_RATE_DIVISOR 
-#define MPU6050_DMP_FIFO_RATE_DIVISOR 0x03
+#define MPU6050_DMP_FIFO_RATE_DIVISOR 0x0A
 #endif
 
 static const unsigned char dmpConfig[MPU6050_DMP_CONFIG_SIZE] PROGMEM = {

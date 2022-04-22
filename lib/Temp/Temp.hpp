@@ -23,7 +23,8 @@
 
 class Temp : public Singleton<Temp>, BusConnection {
 public:
-    float threshold = 0;
+    float threshold_l = 0;
+    float threshold_r = 0;
 
     void Calibrate();
 

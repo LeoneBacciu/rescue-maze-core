@@ -86,6 +86,7 @@ void setup() {
     }
 
     while (!digitalRead(PB4));
+//    while (!serial1.available());
 
     serial1.println("SETUP");
     Robot::Setup();

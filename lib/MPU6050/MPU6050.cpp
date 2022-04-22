@@ -1808,7 +1808,7 @@ void MPU6050_Base::getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx
  *
  * The data within the accelerometer sensors' internal register set is always
  * updated at the Sample Rate. Meanwhile, the user-facing read register set
- * duplicates the internal register set's data values whenever the serial2
+ * duplicates the internal register set's data values whenever the serial
  * interface is idle. This guarantees that a burst read of sensor registers will
  * read measurements from the same sampling instant. Note that if burst reads
  * are not used, the user is responsible for ensuring a set of single byte reads
@@ -1886,7 +1886,7 @@ int16_t MPU6050_Base::getTemperature() {
  * set and a user-facing read register set.
  * The data within the gyroscope sensors' internal register set is always
  * updated at the Sample Rate. Meanwhile, the user-facing read register set
- * duplicates the internal register set's data values whenever the serial2
+ * duplicates the internal register set's data values whenever the serial
  * interface is idle. This guarantees that a burst read of sensor registers will
  * read measurements from the same sampling instant. Note that if burst reads
  * are not used, the user is responsible for ensuring a set of single byte reads
@@ -1962,7 +1962,7 @@ int16_t MPU6050_Base::getRotationZ() {
  * and a user-facing read register set.
  *
  * The data within the external sensors' internal register set is always updated
- * at the Sample Rate (or the reduced access rate) whenever the serial2 interface
+ * at the Sample Rate (or the reduced access rate) whenever the serial interface
  * is idle. This guarantees that a burst read of sensor registers will read
  * measurements from the same sampling instant. Note that if burst reads are not
  * used, the user is responsible for ensuring a set of single byte reads
@@ -2425,7 +2425,7 @@ void MPU6050_Base::reset() {
 }
 /** Get sleep mode status.
  * Setting the SLEEP bit in the register puts the device into very low power
- * sleep mode. In this mode, only the serial2 interface and internal registers
+ * sleep mode. In this mode, only the serial interface and internal registers
  * remain active, allowing for a very low standby current. Clearing this bit
  * puts the device back into normal mode. To save power, the individual standby
  * selections for each of the gyros should be used if any gyro axis is not used
@@ -2556,8 +2556,8 @@ void MPU6050_Base::setClockSource(uint8_t source) {
  * -------------+------------------
  * 0            | 1.25 Hz
  * 1            | 2.5 Hz
- * 2            | 5 Hz
- * 3            | 10 Hz
+ * 2            | 20 Hz
+ * 3            | 40 Hz
  * </pre>
  *
  * For further information regarding the MPU-60X0's power modes, please refer to
@@ -3371,25 +3371,27 @@ void MPU6050_Base::PID(uint8_t ReadAddress, float kP,float kI, uint8_t Loops){
 	resetDMP();
 }
 
+int16_t * MPU6050_Base::GetActiveOffsets() {
+    uint8_t AOffsetRegister = (getDeviceID() < 0x38 )? MPU6050_RA_XA_OFFS_H:0x77;
+    if(AOffsetRegister == 0x06)	I2Cdev::readWords(devAddr, AOffsetRegister, 3, (uint16_t *)offsets, I2Cdev::readTimeout, wireObj);
+    else {
+        I2Cdev::readWords(devAddr, AOffsetRegister, 1, (uint16_t *)offsets, I2Cdev::readTimeout, wireObj);
+        I2Cdev::readWords(devAddr, AOffsetRegister+3, 1, (uint16_t *)(offsets+1), I2Cdev::readTimeout, wireObj);
+        I2Cdev::readWords(devAddr, AOffsetRegister+6, 1, (uint16_t *)(offsets+2), I2Cdev::readTimeout, wireObj);
+    }
+    I2Cdev::readWords(devAddr, 0x13, 3, (uint16_t *)(offsets+3), I2Cdev::readTimeout, wireObj);
+    return offsets;
+}
+
 void MPU6050_Base::PrintActiveOffsets() {
-	uint8_t AOffsetRegister = (getDeviceID() < 0x38 )? MPU6050_RA_XA_OFFS_H:0x77;
-	int16_t Data[3];
-	//Serial.print(F("Offset Register 0x"));
-	//Serial.print(AOffsetRegister>>4,HEX);Serial.print(AOffsetRegister&0x0F,HEX);
-	Serial.print(F("\n//         X Accel  Y Accel  Z Accel   X Gyro   Y Gyro   Z Gyro\n// OFFSETS "));
-	if(AOffsetRegister == 0x06)	I2Cdev::readWords(devAddr, AOffsetRegister, 3, (uint16_t *)Data, I2Cdev::readTimeout, wireObj);
-	else {
-		I2Cdev::readWords(devAddr, AOffsetRegister, 1, (uint16_t *)Data, I2Cdev::readTimeout, wireObj);
-		I2Cdev::readWords(devAddr, AOffsetRegister+3, 1, (uint16_t *)Data+1, I2Cdev::readTimeout, wireObj);
-		I2Cdev::readWords(devAddr, AOffsetRegister+6, 1, (uint16_t *)Data+2, I2Cdev::readTimeout, wireObj);
-	}
+    GetActiveOffsets();
 	//	A_OFFSET_H_READ_A_OFFS(Data);
-    Serial.print((float)Data[0], 5); Serial.print(",  ");
-    Serial.print((float)Data[1], 5); Serial.print(",  ");
-    Serial.print((float)Data[2], 5); Serial.print(",  ");
-	I2Cdev::readWords(devAddr, 0x13, 3, (uint16_t *)Data, I2Cdev::readTimeout, wireObj);
+    Serial.print((float)offsets[0], 5); Serial.print(",\t");
+    Serial.print((float)offsets[1], 5); Serial.print(",\t");
+    Serial.print((float)offsets[2], 5); Serial.print(",\t");
+	
 	//	XG_OFFSET_H_READ_OFFS_USR(Data);
-    Serial.print((float)Data[0], 5); Serial.print(",  ");
-    Serial.print((float)Data[1], 5); Serial.print(",  ");
-    Serial.print((float)Data[2], 5); Serial.print("\n");
+    Serial.print((float)offsets[3], 5); Serial.print(",\t");
+    Serial.print((float)offsets[4], 5); Serial.print(",\t");
+    Serial.print((float)offsets[5], 5); Serial.print("\n\n");
 }

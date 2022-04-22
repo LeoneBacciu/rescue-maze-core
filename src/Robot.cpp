@@ -44,14 +44,16 @@ void Robot::Setup() {
 
     Logger::Verbose(kGeneric, "start");
 
-    delay(1000);
+
+
+//    delay(1000);
 
 //    while (1) {
 //        const auto t = temp_->IsHot();
 //        Logger::Info(kTemp, "%d   %d", t.left, t.right);
 //        delay(1000);
 //    }
-
+//
 //    Driver::SetSpeed(100, 100);
 //    while (1);
 //
@@ -61,10 +63,10 @@ void Robot::Setup() {
 //    }
 
 //    while (1) {
-//        Logger::Info(kGyro, "p: %.2f, r: %.2f, %d", gyro_->Pitch(), gyro_->Roll(), gyro_->IsTilted());
+//        Logger::Info(kGyro, "p: %.2f, r: %.2f, y: %.2f", gyro_->Pitch(), gyro_->Roll(), gyro_->Yaw());
 //        delay(100);
 //    }
-
+//
 //    Walls *walls = compass_->GetWalls();
 //    Logger::Info(kCompass ,"walls: %d %d %d %d", walls->right, walls->front, walls->left, walls->back);
 //    compass_->GoTo(kRight, false, false);
@@ -77,6 +79,11 @@ void Robot::Setup() {
 //
 //    lasers_->StartContinuous();
 //    while (1) {
+//        const auto f = lasers_->ReadFront();
+//        const auto b = lasers_->ReadB();
+//        const auto d = f + b + dimensions::depth;
+//        Logger::Info(kLasers, "f: %d, b: %d, s: %d, m: %d", f, b, d, d % cell_dimensions::depth);
+//        delay(500);
 //        Logger::Info(kLasers, "%d - %d = %d", lasers_->ReadF(), lasers_->ReadB(), lasers_->ComputeVerticalDifference());
 //        Logger::Info(kGeneric, "%d %d %d %d", lasers_->ReadF(), lasers_->ReadR(), lasers_->ReadL(), lasers_->ReadB());
 //        const auto t = temp_->IsHot();
@@ -88,8 +95,13 @@ void Robot::Setup() {
 //        brick_->Drop();
 //        delay(2000);
 //    }
+//    while (1) {
+//        Logger::Info(kGyro, "%.2f, %.2f", gyro_->Pitch(), gyro_->Roll());
+//        delay(500);
+//    }
 
-//    Driver::SetSpeed(68, 232);
+//    Driver::SetSpeed(100, -200);
+//    while (1);
 //    Driver::AdjustFront(false);
 //    Driver::CenterCell();
 //    delay(5000);
@@ -105,9 +117,27 @@ void Robot::Setup() {
 //        delay(250);
 //    }
 
-//    Driver::Rotate(true);
+//    while (1) {
+//        Driver::Rotate(true);
+//        Driver::Rotate(true);
+//        Driver::Rotate(false);
+//        Driver::Rotate(false);
+//        delay(2000);
+//    }
 //    Driver::CenterCell();
 //    Driver::Go();
+//    Driver::Go();
+//    Driver::Rotate(true);
+//    Driver::Go();
+//    Driver::Go();
+//    Driver::Rotate(true);
+//    Driver::Go();
+//    while (1);
+//    Driver::Rotate(true);
+//    Driver::Go();
+//    Driver::Rotate(false);
+//    Driver::Go();
+//    while (1);
 //    Driver::Rotate(false);
 //    Driver::Rotate(true);
 //    Driver::Go();

@@ -4,7 +4,7 @@ Floor::FloorType Floor::Read() {
     const uint32_t color = ReadRaw();
     Logger::Verbose(kFloor, "reading floor -> %d, (%d)", color, blackCounter);
     if (color < threshold - 100) return kCheckpoint;
-    if (color > threshold + 50 && color < threshold + 150) {
+    if (color > threshold + 150 && color < threshold + 350) {
         if (++blackCounter > 2) return kBlack;
         else return kWhite;
     }

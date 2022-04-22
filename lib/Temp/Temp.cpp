@@ -3,10 +3,10 @@
 
 GeometricPair<bool> Temp::IsHot() {
     const auto measures = Read();
-    Logger::Info(kTemp, "%.1f temp: %.1f, %.1f", threshold, measures.left, measures.right);
+    Logger::Info(kTemp, "%.1f %.1f temp: %.1f, %.1f", threshold_l, threshold_r, measures.left, measures.right);
     return {
-        measures.left > threshold,
-        measures.right > threshold
+            measures.left > threshold_l,
+            measures.right > threshold_r
     };
 }
 
@@ -48,7 +48,8 @@ float Temp::ReadSide(FVector direction) const {
 
 void Temp::Calibrate() {
     auto data = Read();
-    threshold = (data.left + data.right) / 2 + 3;
+    threshold_l = data.left + 2;
+    threshold_r = data.right + 2;
 }
 
 GeometricPair<float> Temp::Read() {
@@ -56,7 +57,6 @@ GeometricPair<float> Temp::Read() {
 }
 
 float Temp::readTemp(uint8_t addr) {
-    uint8_t buffer[3];
     GetBus()->beginTransmission(addr); // start transmission to device
     GetBus()->write(0x07);                 // sends register address to ReadF from
     GetBus()->endTransmission(false);   // end transmission

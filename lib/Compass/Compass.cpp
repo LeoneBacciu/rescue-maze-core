@@ -40,8 +40,18 @@ Walls *Compass::GetWalls() const {
     delay(500);
     auto lasers = Lasers::Instance();
     const uint16_t threshold = cell_dimensions::depth;
+    uint16_t loops = 5;
+    uint16_t multi_walls[4] = {0, 0, 0, 0};
+    for (int i = 0; i < loops; ++i) {
+        multi_walls[0] = max(lasers->ReadF(), multi_walls[0]);
+        multi_walls[1] = max(lasers->ReadL(), multi_walls[1]);
+        multi_walls[2] = max(lasers->ReadB(), multi_walls[2]);
+        multi_walls[3] = max(lasers->ReadR(), multi_walls[3]);
+        delay(100);
+    }
     uint16_t tmp_walls[] = {
-            lasers->ReadFrontMin(), lasers->ReadL(), lasers->ReadB(), lasers->ReadR()
+            multi_walls[0], multi_walls[1],
+            multi_walls[2], multi_walls[3]
     }, walls[4];
     for (int i = 0; i < 4; ++i) walls[(i + direction_) % 4] = tmp_walls[i];
     Logger::Info(kCompass, "%d - wall values: %d %d %d %d", direction_, walls[0], walls[1], walls[2], walls[3]);
@@ -76,6 +86,7 @@ bool Compass::Drop(const uint8_t force) const {
 
 uint8_t Compass::GetSidesCode() const {
     auto lasers = Lasers::Instance();
-    const auto left = lasers->ReadL() <= cell_dimensions::depth, right = lasers->ReadR() <= cell_dimensions::depth;
+    const auto left = lasers->ReadL() <= cell_dimensions::depth_tolerant, right =
+            lasers->ReadR() <= cell_dimensions::depth_tolerant;
     return (left ? 0x10 : 0) | (right ? 0x01 : 0);
 }

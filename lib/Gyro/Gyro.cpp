@@ -39,6 +39,7 @@ float Gyro::CalculateError() {
 
 void Gyro::Begin() {
     wire.begin();
+    wire.setClock(400000);
     mpu.initialize();
     uint8_t devStatus = mpu.dmpInitialize();
     if (devStatus == 0) {
@@ -77,11 +78,14 @@ void Gyro::Calibrate(const uint16_t samples) {
 }
 
 void Gyro::Update() {
-    if (millis() - lastMillis > 50) {
-        mpu.dmpGetCurrentFIFOPacket(fifoBuffer);
-        mpu.dmpGetQuaternion(&q, fifoBuffer);
-        mpu.dmpGetGravity(&gravity, &q);
-        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    if (millis() - lastMillis > 100) {
+        if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) {
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+        } else {
+            Logger::Error(kGyro, "no data in buffer");
+        }
         lastMillis = millis();
     }
 }
@@ -104,6 +108,16 @@ void Gyro::LoadCalibration() {
     } else {
         Calibrate();
     }
+}
+
+int8_t Gyro::IsRamp(const uint8_t pitch_threshold, const uint8_t roll_threshold) {
+    const auto pitch = Pitch(), roll = Roll();
+    if (abs(pitch - 180) > pitch_threshold) {
+//        if (++ramp_buffer > 3) {
+        return pitch > 180 ? 1 : -1;
+//        }
+    }
+    return 0;
 }
 
 #endif
