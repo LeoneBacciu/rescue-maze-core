@@ -44,7 +44,18 @@ void Robot::Setup() {
 
     Logger::Verbose(kGeneric, "start");
 
-
+//    while (1) {
+//        Logger::Info(kLasers, "%d", lasers_->ComputeVerticalDifference());
+//        delay(500);
+//        Driver::CenterCell();
+//        delay(4000);
+//    }
+//
+//    while (1) {
+//        Logger::Info(kGeneric, "%d %d %d %d", lasers_->ReadFront(), lasers_->ReadR(), lasers_->ReadL(),
+//                     lasers_->ReadB());
+//        delay(500);
+//    }
 
 //    delay(1000);
 
@@ -53,7 +64,7 @@ void Robot::Setup() {
 //        Logger::Info(kTemp, "%d   %d", t.left, t.right);
 //        delay(1000);
 //    }
-//
+
 //    Driver::SetSpeed(100, 100);
 //    while (1);
 //

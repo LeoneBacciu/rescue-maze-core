@@ -32,7 +32,7 @@ public:
 
     int16_t ComputeLateralDifference(uint16_t threshold = 1000, int16_t bias = 0);
 
-    int16_t ComputeVerticalDifference(uint16_t threshold = 1000, int16_t bias = 0);
+    int16_t ComputeVerticalDifference(uint16_t threshold = 1200, int16_t bias = 0);
 
     uint16_t ReadFL();
 
@@ -51,6 +51,8 @@ public:
     static bool IsValidWall(uint16_t l, uint16_t c, uint16_t r, uint16_t tolerance = 10);
 
     static int16_t FrontDifference(uint16_t l, uint16_t r, int16_t bias = 4);
+
+    bool IsRamp();
 
 private:
 #if _EXECUTION_ENVIRONMENT == 0
@@ -89,12 +91,12 @@ private:
 
 
     struct BIASES {
-        static const int8_t R = -5;
+        static const int8_t R = 0;
         static const int8_t FR = -5;
         static const int8_t F = -16;
         static const int8_t FL = 0;
-        static const int8_t L = -15;
-        static const int8_t B = -16;
+        static const int8_t L = 0;
+        static const int8_t B = -15;
     };
 
 #endif

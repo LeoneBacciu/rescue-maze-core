@@ -322,35 +322,37 @@ bool Driver::CenterCell() {
     uint16_t distance = use_front ? f : b;
     bool tilted = false;
 
-    if (distance > (cell_dimensions::depth / 2) + cell_dimensions::depth * 2) return false;
+    if (distance > 5000) return false;
 
+    auto start_angle = gyro->Yaw();
     if (distance > (cell_dimensions::depth / 2)) {
-        int16_t diff, trials = 10;
+        int16_t diff, trials = 50;
         do {
             if (gyro->IsTilted()) {
                 tilted = true;
                 break;
             }
             diff = lasers->ComputeVerticalDifference();
+            auto delta = math::AngleDifference(gyro->Yaw(), start_angle) * -5;
             Logger::Verbose(kDrivers, "center middle %d", diff);
             int speed = abs(diff) > 30 ? kMedium : kSlow;
-            SetSpeed(speed * (diff > 0 ? 1 : -1), speed * (diff > 0 ? 1 : -1));
-            delay(25);
+            SetSpeed(speed * (diff > 0 ? 1 : -1)- delta, speed * (diff > 0 ? 1 : -1) + delta);
+            delay(50);
         } while (abs(diff) > 10 && --trials > 0);
-        Break(kBreak * (diff > 0 ? -1 : 1), kBreak * (diff > 0 ? -1 : 1));
+        Break(kBreak * (diff > 0 ? -1 : 1), kBreak * (diff > 0 ? -1 : 1), 250);
         return tilted;
     }
 
     int speed = kMedium * (use_front ? 1 : -1);
-    int16_t trials = 20;
-    auto start_angle = gyro->Yaw();
+    int16_t trials = 25;
     while (distance >= movements::touch && --trials > 0) {
         if (gyro->IsTilted()) {
             tilted = true;
             break;
         }
-        auto delta = math::AngleDifference(gyro->Yaw(), start_angle) * -5;
-        Driver::SetSpeed(speed - delta, speed + delta);
+//        auto delta = math::AngleDifference(gyro->Yaw(), start_angle) * -5;
+//        Driver::SetSpeed(speed - delta, speed + delta);
+        SetSpeed(speed, speed);
         distance = (use_front ? lasers->ReadFront() : lasers->ReadB());
         Logger::Verbose(kDrivers, "center first %d", distance);
         delay(100);
@@ -431,15 +433,17 @@ bool Driver::ExpensiveCenter() {
     } else {
         return false;
     }
-    int16_t diff, trials = 10;
+    auto start_angle = gyro->Yaw();
+    int16_t diff, trials = 50;
     do {
         diff = lasers->ComputeVerticalDifference();
         Logger::Verbose(kDrivers, "center middle %d", diff);
+        auto delta = math::AngleDifference(gyro->Yaw(), start_angle) * -5;
         int speed = abs(diff) > 30 ? kMedium : kSlow;
-        SetSpeed(speed * (diff > 0 ? 1 : -1), speed * (diff > 0 ? 1 : -1));
-        delay(25);
+        SetSpeed(speed * (diff > 0 ? 1 : -1) - delta, speed * (diff > 0 ? 1 : -1) + -delta);
+        delay(50);
     } while (abs(diff) > 10 && --trials > 0);
-    Break(kBreak * (diff > 0 ? -1 : 1), kBreak * (diff > 0 ? -1 : 1));
+    Break(kBreak * (diff > 0 ? -1 : 1), kBreak * (diff > 0 ? -1 : 1), 250);
 
     return true;
 }

@@ -209,12 +209,20 @@ int16_t Lasers::ComputeVerticalDifference(uint16_t threshold, int16_t bias) {
         trials--;
         delay(1);
     } while (trials > 0 && (!math::InRange<uint16_t>(f, 1, 8000) || !math::InRange<uint16_t>(b, 1, 8000)));
-    if (f > threshold || b > threshold || (f + b + dimensions::depth) % cell_dimensions::depth > movements::unsafe_wall) return 0;
+    if (f > threshold || b > threshold) return 0;
 
+    Logger::Info(kLasers, "f: %d, b: %d", f, b);
     int32_t f_remainder = f % cell_dimensions::depth;
     int32_t b_remainder = b % cell_dimensions::depth;
-    f_remainder = f_remainder > dimensions::depth ? f_remainder - cell_dimensions::depth : f_remainder;
-    b_remainder = b_remainder > dimensions::depth ? b_remainder - cell_dimensions::depth : b_remainder;
+    Logger::Info(kLasers, "fr: %d, br: %d", f_remainder, b_remainder);
+    if (f_remainder > dimensions::depth || b_remainder > dimensions::depth) {
+        if (f_remainder > b_remainder) {
+            f_remainder -= cell_dimensions::depth;
+        } else {
+            b_remainder -= cell_dimensions::depth;
+        }
+    }
+    Logger::Info(kLasers, "frr: %d, brr: %d", f_remainder, b_remainder);
 
     return f_remainder - b_remainder + bias;
 }
@@ -311,6 +319,12 @@ uint16_t Lasers::ReadFront() {
     if (frontCounter == 0) return ReadFL();
     if (frontCounter == 2) return ReadFR();
     return ReadF();
+}
+
+bool Lasers::IsRamp() {
+    const auto f = ReadF();
+    const auto b = ReadB();
+    return (f + b + dimensions::depth) % cell_dimensions::depth > movements::unsafe_wall;
 }
 
 
